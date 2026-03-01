@@ -3,7 +3,7 @@ import { fetchAllExchangeOI, aggregateOI } from '@/lib/exchanges';
 import { fetchCoinSupplyQuick, hasFullSupplyCache } from '@/lib/coingecko';
 import { buildSymbolMapFromSupply, normalizeMultiplierSymbol, canonicalToCoinGeckoId } from '@/lib/symbol-map';
 import { enrichWithOIMC } from '@/lib/oi-mc-index';
-import { saveOISnapshot, getOIChange } from '@/lib/oi-snapshots';
+import { saveOISnapshot, computeAllOIChanges } from '@/lib/oi-snapshots';
 import { cache } from '@/lib/cache';
 import { CACHE_TTL } from '@/lib/constants';
 import type { AggregatedCoinOI, CoinSupplyData, DashboardResponse } from '@/types';
@@ -140,13 +140,17 @@ export async function GET() {
     const enriched = enrichWithOIMC(Array.from(deduped.values()));
 
     // Save OI snapshot for change tracking
-    saveOISnapshot(enriched);
+    await saveOISnapshot(enriched);
 
-    // Compute OI changes (1h / 6h / 24h)
+    // Compute OI changes (1h / 6h / 24h) - 3 queries total
+    const changes = await computeAllOIChanges(enriched);
     for (const coin of enriched) {
-      coin.oiChange1h = getOIChange(coin.symbol, 1);
-      coin.oiChange6h = getOIChange(coin.symbol, 6);
-      coin.oiChange24h = getOIChange(coin.symbol, 24);
+      const c = changes.get(coin.symbol);
+      if (c) {
+        coin.oiChange1h = c.oiChange1h;
+        coin.oiChange6h = c.oiChange6h;
+        coin.oiChange24h = c.oiChange24h;
+      }
     }
 
     // Sort by total OI descending
