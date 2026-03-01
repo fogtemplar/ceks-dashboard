@@ -116,6 +116,18 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
           aVal = a.oiMcRatio;
           bVal = b.oiMcRatio;
           break;
+        case 'priceChange1h':
+          aVal = a.priceChange1h ?? 0;
+          bVal = b.priceChange1h ?? 0;
+          break;
+        case 'priceChange6h':
+          aVal = a.priceChange6h ?? 0;
+          bVal = b.priceChange6h ?? 0;
+          break;
+        case 'priceChange24h':
+          aVal = a.priceChange24h ?? 0;
+          bVal = b.priceChange24h ?? 0;
+          break;
         default:
           aVal = a.totalOI;
           bVal = b.totalOI;
@@ -172,15 +184,27 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                 direction={sortDir}
                 onSort={handleSort}
               />
-              <th className="px-3 py-3 text-right text-xs font-medium text-zinc-500 uppercase whitespace-nowrap">
-                P 1h
-              </th>
-              <th className="px-3 py-3 text-right text-xs font-medium text-zinc-500 uppercase whitespace-nowrap">
-                P 6h
-              </th>
-              <th className="px-3 py-3 text-right text-xs font-medium text-zinc-500 uppercase whitespace-nowrap">
-                P 24h
-              </th>
+              <SortHeader
+                label="P 1h"
+                field="priceChange1h"
+                currentSort={sortField}
+                direction={sortDir}
+                onSort={handleSort}
+              />
+              <SortHeader
+                label="P 6h"
+                field="priceChange6h"
+                currentSort={sortField}
+                direction={sortDir}
+                onSort={handleSort}
+              />
+              <SortHeader
+                label="P 24h"
+                field="priceChange24h"
+                currentSort={sortField}
+                direction={sortDir}
+                onSort={handleSort}
+              />
               <SortHeader
                 label="OI/MC"
                 field="oiMcRatio"

@@ -74,6 +74,9 @@ export type SortField =
   | 'oiChange6h'
   | 'oiChange24h'
   | 'oiMcIndex'
-  | 'oiMcRatio';
+  | 'oiMcRatio'
+  | 'priceChange1h'
+  | 'priceChange6h'
+  | 'priceChange24h';
 
 export type SortDirection = 'asc' | 'desc';
