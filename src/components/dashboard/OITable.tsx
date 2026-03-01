@@ -279,8 +279,17 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                     </div>
                   </button>
                 </td>
-                <td className="px-3 py-3 text-right text-sm text-zinc-300">
-                  {coin.price > 0 ? formatPrice(coin.price) : '-'}
+                <td className="px-3 py-3 text-right text-sm">
+                  {coin.price > 0 ? (
+                    <div>
+                      <span className="text-zinc-300">{formatPrice(coin.price)}</span>
+                      {coin.priceChange24h !== null && (
+                        <span className={`ml-1 text-xs ${coin.priceChange24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {formatPercent(coin.priceChange24h)}
+                        </span>
+                      )}
+                    </div>
+                  ) : '-'}
                 </td>
                 <td className="px-3 py-3 text-right text-sm text-zinc-300">
                   {coin.marketCap > 0 ? `${(coin.oiMcRatio * 100).toFixed(2)}%` : '-'}
