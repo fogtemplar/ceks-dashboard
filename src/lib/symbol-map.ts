@@ -105,6 +105,7 @@ const CANONICAL_TO_COINGECKO: Record<string, string> = {
   PTB: 'portal-to-bitcoin',
   LAYER: 'solayer',
   SKY: 'sky',
+  DYDX: 'dydx-chain',
 };
 
 let dynamicMap: Record<string, string> | null = null;
