@@ -44,11 +44,27 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
     setExchanges((prev) => ({ ...prev, [ex]: !prev[ex] }));
   };
 
+  const allExchangesOn = exchanges.binance && exchanges.bybit && exchanges.okx && exchanges.bitget;
+
   const filtered = useMemo(() => {
     let result = data;
 
     if (mcOnly) {
       result = result.filter((c) => c.marketCap > 0);
+    }
+
+    // Filter by exchange: only show coins that have OI on at least one enabled exchange
+    // Recalculate totalOI based on enabled exchanges
+    if (!allExchangesOn) {
+      result = result.map((c) => {
+        const filteredTotal =
+          (exchanges.binance ? c.oiByExchange.binance ?? 0 : 0) +
+          (exchanges.bybit ? c.oiByExchange.bybit ?? 0 : 0) +
+          (exchanges.okx ? c.oiByExchange.okx ?? 0 : 0) +
+          (exchanges.bitget ? c.oiByExchange.bitget ?? 0 : 0);
+        if (filteredTotal <= 0) return null;
+        return { ...c, totalOI: filteredTotal };
+      }).filter((c): c is AggregatedCoinOI => c !== null);
     }
 
     if (search) {
@@ -108,7 +124,7 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
     });
 
     return result;
-  }, [data, search, sortField, sortDir, mcOnly]);
+  }, [data, search, sortField, sortDir, mcOnly, allExchangesOn, exchanges.binance, exchanges.bybit, exchanges.okx, exchanges.bitget]);
 
   return (
     <div>

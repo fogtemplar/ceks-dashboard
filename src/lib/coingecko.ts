@@ -1,5 +1,6 @@
-import { COINGECKO_BASE, CACHE_TTL, TOP_COINS_LIMIT, COINGECKO_PAGES } from './constants';
+import { COINGECKO_BASE, CACHE_TTL, TOP_COINS_LIMIT, COINGECKO_PAGES, COINGECKO_MAX_RETRIES, COINGECKO_PAGE_DELAY, COINGECKO_RETRY_DELAY } from './constants';
 import { cache } from './cache';
+import { fetchWithTimeout } from './fetch-with-timeout';
 import type { CoinSupplyData } from '@/types';
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -11,29 +12,28 @@ async function fetchPages(maxPages: number): Promise<Map<string, CoinSupplyData[
   const result = new Map<string, CoinSupplyData[]>();
 
   let retries = 0;
-  const MAX_RETRIES = 3;
 
-  for (let page = 1; page <= maxPages; page++) {
+  let page = 1;
+  while (page <= maxPages) {
     try {
       if (page > 1) {
-        await delay(1500);
+        await delay(COINGECKO_PAGE_DELAY);
       }
 
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `${COINGECKO_BASE}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${TOP_COINS_LIMIT}&page=${page}&sparkline=false`,
-        { next: { revalidate: 3600 } }
+        { next: { revalidate: 3600 } } as RequestInit & { timeout?: number }
       );
 
       if (res.status === 429) {
         retries++;
-        if (retries > MAX_RETRIES) {
+        if (retries > COINGECKO_MAX_RETRIES) {
           console.warn(`CoinGecko rate limit: max retries reached at page ${page}, using ${result.size} coins`);
           break;
         }
-        console.warn(`CoinGecko rate limited at page ${page}, retry ${retries}/${MAX_RETRIES}...`);
-        await delay(5000);
-        page--;
-        continue;
+        console.warn(`CoinGecko rate limited at page ${page}, retry ${retries}/${COINGECKO_MAX_RETRIES}...`);
+        await delay(COINGECKO_RETRY_DELAY);
+        continue; // retry same page
       }
 
       retries = 0;
@@ -65,6 +65,7 @@ async function fetchPages(maxPages: number): Promise<Map<string, CoinSupplyData[
       }
 
       console.log(`CoinGecko page ${page}/${maxPages}: ${result.size} coins loaded`);
+      page++;
     } catch (err) {
       console.warn(`CoinGecko page ${page} error:`, err);
       break;

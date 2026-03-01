@@ -5,7 +5,7 @@ import { buildSymbolMapFromSupply, normalizeMultiplierSymbol, canonicalToCoinGec
 import { enrichWithOIMC } from '@/lib/oi-mc-index';
 import { saveOISnapshot, computeAllOIChanges } from '@/lib/oi-snapshots';
 import { cache } from '@/lib/cache';
-import { CACHE_TTL } from '@/lib/constants';
+import { CACHE_TTL, PRICE_RATIO_MIN, PRICE_RATIO_MAX } from '@/lib/constants';
 import type { AggregatedCoinOI, CoinSupplyData, DashboardResponse } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -58,7 +58,7 @@ export async function GET() {
         const c = candidates[0];
         if (realPrice > 0 && c.cgPrice > 0) {
           const ratio = realPrice / c.cgPrice;
-          supply = (ratio >= 0.2 && ratio <= 5) ? c : undefined;
+          supply = (ratio >= PRICE_RATIO_MIN && ratio <= PRICE_RATIO_MAX) ? c : undefined;
         } else {
           supply = c;
         }
@@ -76,7 +76,7 @@ export async function GET() {
         // Reject if even best match is >5x off
         if (supply && supply.cgPrice > 0) {
           const ratio = realPrice / supply.cgPrice;
-          if (ratio < 0.2 || ratio > 5) supply = undefined;
+          if (ratio < PRICE_RATIO_MIN || ratio > PRICE_RATIO_MAX) supply = undefined;
         }
       } else if (candidates.length > 1) {
         supply = candidates[0]; // no price → use highest MC

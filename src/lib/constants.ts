@@ -18,3 +18,19 @@ export const CACHE_TTL = {
 export const BINANCE_BATCH_CONCURRENCY = 10;
 export const TOP_COINS_LIMIT = 250;
 export const COINGECKO_PAGES = 12; // 250 x 12 = 3000 coins
+
+// Fetch timeouts (ms)
+export const FETCH_TIMEOUT = 15_000;        // 15s for single exchange API
+export const FETCH_TIMEOUT_BINANCE = 8_000; // 8s per individual Binance OI call
+
+// CoinGecko retry
+export const COINGECKO_MAX_RETRIES = 3;
+export const COINGECKO_PAGE_DELAY = 1_500;
+export const COINGECKO_RETRY_DELAY = 5_000;
+
+// OI Snapshots
+export const SNAPSHOT_MAX_AGE_MS = 25 * 3_600_000;
+
+// Price validation bounds (exchange vs CoinGecko)
+export const PRICE_RATIO_MIN = 0.2;
+export const PRICE_RATIO_MAX = 5;

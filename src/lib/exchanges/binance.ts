@@ -1,6 +1,7 @@
-import { BINANCE_FUTURES_BASE, CACHE_TTL, BINANCE_BATCH_CONCURRENCY } from '../constants';
+import { BINANCE_FUTURES_BASE, CACHE_TTL, BINANCE_BATCH_CONCURRENCY, FETCH_TIMEOUT_BINANCE } from '../constants';
 import { cache } from '../cache';
 import { binanceToCanonical } from '../symbol-map';
+import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { ExchangeOIMap, PriceMap } from './types';
 
 interface BinanceExchangeInfo {
@@ -27,7 +28,7 @@ async function fetchBinanceSymbols(): Promise<string[]> {
   const cached = cache.get<string[]>('exchangeInfo:binance');
   if (cached) return cached;
 
-  const res = await fetch(`${BINANCE_FUTURES_BASE}/fapi/v1/exchangeInfo`);
+  const res = await fetchWithTimeout(`${BINANCE_FUTURES_BASE}/fapi/v1/exchangeInfo`);
   if (!res.ok) throw new Error(`Binance exchangeInfo: ${res.status}`);
   const data: BinanceExchangeInfo = await res.json();
 
@@ -48,7 +49,7 @@ async function fetchBinancePrices(): Promise<Map<string, number>> {
   const cached = cache.get<Map<string, number>>('prices:binance');
   if (cached) return cached;
 
-  const res = await fetch(`${BINANCE_FUTURES_BASE}/fapi/v1/ticker/24hr`);
+  const res = await fetchWithTimeout(`${BINANCE_FUTURES_BASE}/fapi/v1/ticker/24hr`);
   if (!res.ok) throw new Error(`Binance ticker: ${res.status}`);
   const tickers: BinanceTicker[] = await res.json();
 
@@ -74,8 +75,9 @@ export async function fetchBinancePricesCanonical(): Promise<PriceMap> {
 
 async function fetchSingleOI(symbol: string): Promise<{ symbol: string; oi: number } | null> {
   try {
-    const res = await fetch(
-      `${BINANCE_FUTURES_BASE}/fapi/v1/openInterest?symbol=${symbol}`
+    const res = await fetchWithTimeout(
+      `${BINANCE_FUTURES_BASE}/fapi/v1/openInterest?symbol=${symbol}`,
+      { timeout: FETCH_TIMEOUT_BINANCE }
     );
     if (!res.ok) return null;
     const data: BinanceOIResponse = await res.json();
@@ -138,7 +140,7 @@ export async function fetchBinancePriceHistory(
   if (cached) return cached;
 
   const binanceSymbol = `${symbol}USDT`;
-  const res = await fetch(
+  const res = await fetchWithTimeout(
     `${BINANCE_FUTURES_BASE}/fapi/v1/klines?symbol=${binanceSymbol}&interval=${interval}&limit=${limit}`
   );
   if (!res.ok) return [];
@@ -163,7 +165,7 @@ export async function fetchBinanceOIHistory(
   if (cached) return cached;
 
   const binanceSymbol = `${symbol}USDT`;
-  const res = await fetch(
+  const res = await fetchWithTimeout(
     `${BINANCE_FUTURES_BASE}/futures/data/openInterestHist?symbol=${binanceSymbol}&period=${period}&limit=${limit}`
   );
   if (!res.ok) return [];

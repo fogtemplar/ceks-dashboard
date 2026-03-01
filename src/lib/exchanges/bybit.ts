@@ -1,6 +1,7 @@
 import { BYBIT_BASE, CACHE_TTL } from '../constants';
 import { cache } from '../cache';
 import { bybitToCanonical } from '../symbol-map';
+import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { ExchangeOIMap, PriceMap } from './types';
 
 interface BybitTickerResponse {
@@ -35,7 +36,7 @@ async function fetchBybitTickers(): Promise<BybitFetchResult> {
   const cached = cache.get<BybitFetchResult>('bybit:tickers:parsed');
   if (cached) return cached;
 
-  const res = await fetch(
+  const res = await fetchWithTimeout(
     `${BYBIT_BASE}/v5/market/tickers?category=linear`
   );
   if (!res.ok) throw new Error(`Bybit tickers: ${res.status}`);
@@ -86,7 +87,7 @@ export async function fetchBybitOIHistory(
   if (cached) return cached;
 
   const bybitSymbol = `${symbol}USDT`;
-  const res = await fetch(
+  const res = await fetchWithTimeout(
     `${BYBIT_BASE}/v5/market/open-interest?category=linear&symbol=${bybitSymbol}&intervalTime=${intervalTime}&limit=${limit}`
   );
   if (!res.ok) return [];

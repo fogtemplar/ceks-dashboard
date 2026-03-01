@@ -3,6 +3,7 @@
 // Used to compute 1h / 6h / 24h OI changes
 
 import { supabase } from './supabase';
+import { SNAPSHOT_MAX_AGE_MS } from './constants';
 
 // ── In-memory fallback (used when Supabase is not configured) ──
 
@@ -11,7 +12,7 @@ interface MemSnapshot {
   data: Map<string, number>;
 }
 
-const MAX_AGE_MS = 25 * 3600_000;
+const MAX_AGE_MS = SNAPSHOT_MAX_AGE_MS;
 const memSnapshots: MemSnapshot[] = [];
 let saveCounter = 0;
 

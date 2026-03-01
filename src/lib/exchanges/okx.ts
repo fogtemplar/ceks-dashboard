@@ -1,6 +1,7 @@
 import { OKX_BASE, CACHE_TTL } from '../constants';
 import { cache } from '../cache';
 import { okxToCanonical } from '../symbol-map';
+import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { ExchangeOIMap } from './types';
 
 interface OkxOIResponse {
@@ -19,7 +20,7 @@ export async function fetchOkxOI(): Promise<ExchangeOIMap> {
   if (cached) return cached;
 
   // Fetch OI data
-  const res = await fetch(
+  const res = await fetchWithTimeout(
     `${OKX_BASE}/api/v5/public/open-interest?instType=SWAP`
   );
   if (!res.ok) throw new Error(`OKX OI: ${res.status}`);
@@ -28,10 +29,12 @@ export async function fetchOkxOI(): Promise<ExchangeOIMap> {
   if (data.code !== '0') throw new Error(`OKX error: ${data.code}`);
 
   // We also need prices for OI conversion
-  const priceRes = await fetch(
+  const priceRes = await fetchWithTimeout(
     `${OKX_BASE}/api/v5/market/tickers?instType=SWAP`
   );
+  if (!priceRes.ok) throw new Error(`OKX prices: ${priceRes.status}`);
   const priceData = await priceRes.json();
+  if (priceData.code !== '0') throw new Error(`OKX price error: ${priceData.code}`);
   const prices = new Map<string, number>();
   for (const t of priceData.data ?? []) {
     prices.set(t.instId, parseFloat(t.last));

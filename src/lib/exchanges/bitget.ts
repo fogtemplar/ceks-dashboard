@@ -1,5 +1,6 @@
 import { CACHE_TTL } from '../constants';
 import { cache } from '../cache';
+import { fetchWithTimeout } from '../fetch-with-timeout';
 import type { ExchangeOIMap, PriceMap } from './types';
 
 const BITGET_BASE = 'https://api.bitget.com';
@@ -27,7 +28,7 @@ async function fetchBitgetTickers(): Promise<BitgetFetchResult> {
   const cached = cache.get<BitgetFetchResult>('bitget:tickers:parsed');
   if (cached) return cached;
 
-  const res = await fetch(
+  const res = await fetchWithTimeout(
     `${BITGET_BASE}/api/v2/mix/market/tickers?productType=USDT-FUTURES`
   );
   if (!res.ok) throw new Error(`Bitget tickers: ${res.status}`);
