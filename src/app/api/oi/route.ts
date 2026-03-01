@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchAllExchangeOI, aggregateOI } from '@/lib/exchanges';
-import { fetchCoinSupply } from '@/lib/coingecko';
+import { fetchCoinSupplyQuick, hasFullSupplyCache } from '@/lib/coingecko';
 import { buildSymbolMapFromSupply, normalizeMultiplierSymbol, canonicalToCoinGeckoId } from '@/lib/symbol-map';
 import { enrichWithOIMC } from '@/lib/oi-mc-index';
 import { cache } from '@/lib/cache';
@@ -17,13 +17,15 @@ export async function GET() {
       return NextResponse.json(cached);
     }
 
-    // Supply data from CoinGecko (cached 1 hour - barely changes)
+    // Supply: quick (500 coins) on cold start, full (3000) after warm
     // Prices from exchanges (real-time)
     // MC = supply × exchange price
     const [exchangeData, supplyMap] = await Promise.all([
       fetchAllExchangeOI(),
-      fetchCoinSupply(),
+      fetchCoinSupplyQuick(),
     ]);
+
+    const isPartial = !hasFullSupplyCache();
 
     // Build symbol map from supply data (no extra API call)
     const symbolMap = buildSymbolMapFromSupply(supplyMap);
@@ -140,9 +142,12 @@ export async function GET() {
     const response: DashboardResponse = {
       updatedAt: new Date().toISOString(),
       data: enriched,
+      isPartial,
     };
 
-    cache.set('oi:aggregated', response, CACHE_TTL.AGGREGATED_OI);
+    // Partial data: short cache so it refreshes after warm completes
+    const ttl = isPartial ? 10_000 : CACHE_TTL.AGGREGATED_OI;
+    cache.set('oi:aggregated', response, ttl);
 
     return NextResponse.json(response);
   } catch (error) {

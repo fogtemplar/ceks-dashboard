@@ -4,21 +4,17 @@ import type { CoinSupplyData } from '@/types';
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-// Only fetches circulating supply + name/image from CoinGecko
-// Cached for 1 hour since supply barely changes
-// MC is calculated: supply × exchange price
-export async function fetchCoinSupply(): Promise<Map<string, CoinSupplyData[]>> {
-  const cached = cache.get<Map<string, CoinSupplyData[]>>('supply:all');
-  if (cached) return cached;
+const QUICK_PAGES = 2; // 500 coins - fast initial load
 
+// Internal: fetch N pages from CoinGecko
+async function fetchPages(maxPages: number): Promise<Map<string, CoinSupplyData[]>> {
   const result = new Map<string, CoinSupplyData[]>();
 
   let retries = 0;
   const MAX_RETRIES = 3;
 
-  for (let page = 1; page <= COINGECKO_PAGES; page++) {
+  for (let page = 1; page <= maxPages; page++) {
     try {
-      // Rate limit: pause 1.5s between every request
       if (page > 1) {
         await delay(1500);
       }
@@ -36,11 +32,11 @@ export async function fetchCoinSupply(): Promise<Map<string, CoinSupplyData[]>> 
         }
         console.warn(`CoinGecko rate limited at page ${page}, retry ${retries}/${MAX_RETRIES}...`);
         await delay(5000);
-        page--; // retry this page
+        page--;
         continue;
       }
 
-      retries = 0; // reset on success
+      retries = 0;
 
       if (!res.ok) {
         console.warn(`CoinGecko page ${page}: ${res.status}`);
@@ -48,7 +44,7 @@ export async function fetchCoinSupply(): Promise<Map<string, CoinSupplyData[]>> 
       }
       const coins = await res.json();
 
-      if (!coins.length) break; // no more data
+      if (!coins.length) break;
 
       for (const coin of coins) {
         const sym = coin.symbol.toUpperCase();
@@ -68,13 +64,48 @@ export async function fetchCoinSupply(): Promise<Map<string, CoinSupplyData[]>> 
         }
       }
 
-      console.log(`CoinGecko page ${page}/${COINGECKO_PAGES}: ${result.size} coins loaded`);
+      console.log(`CoinGecko page ${page}/${maxPages}: ${result.size} coins loaded`);
     } catch (err) {
       console.warn(`CoinGecko page ${page} error:`, err);
       break;
     }
   }
 
-  cache.set('supply:all', result, CACHE_TTL.SUPPLY);
   return result;
 }
+
+// Quick fetch: 2 pages (500 coins) for fast initial response
+// Used by /api/oi when no full cache exists
+export async function fetchCoinSupplyQuick(): Promise<Map<string, CoinSupplyData[]>> {
+  // If full cache exists, use that instead
+  const full = cache.get<Map<string, CoinSupplyData[]>>('supply:all');
+  if (full) return full;
+
+  const quick = cache.get<Map<string, CoinSupplyData[]>>('supply:quick');
+  if (quick) return quick;
+
+  const result = await fetchPages(QUICK_PAGES);
+  cache.set('supply:quick', result, CACHE_TTL.SUPPLY);
+  return result;
+}
+
+// Full fetch: all 12 pages (3000 coins)
+// Called by /api/supply/warm in background
+export async function fetchCoinSupplyFull(): Promise<Map<string, CoinSupplyData[]>> {
+  const cached = cache.get<Map<string, CoinSupplyData[]>>('supply:all');
+  if (cached) return cached;
+
+  const result = await fetchPages(COINGECKO_PAGES);
+  cache.set('supply:all', result, CACHE_TTL.SUPPLY);
+  // Also clear quick cache so next /api/oi uses full
+  cache.delete('supply:quick');
+  return result;
+}
+
+// Check if full supply data is cached
+export function hasFullSupplyCache(): boolean {
+  return cache.get<Map<string, CoinSupplyData[]>>('supply:all') !== null;
+}
+
+// Legacy alias
+export const fetchCoinSupply = fetchCoinSupplyQuick;

@@ -56,6 +56,7 @@ export interface CoinSupplyData {
 export interface DashboardResponse {
   updatedAt: string;
   data: AggregatedCoinOI[];
+  isPartial?: boolean; // true when only quick CoinGecko data loaded
 }
 
 export type SortField =

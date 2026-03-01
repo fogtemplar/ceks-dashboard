@@ -11,7 +11,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { timeAgo } from '@/lib/format';
 
 export function OIDashboard() {
-  const { data, updatedAt, error, isLoading, isValidating, refresh } =
+  const { data, updatedAt, isPartial, error, isLoading, isValidating, refresh } =
     useOIData();
   const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
 
@@ -57,6 +57,11 @@ export function OIDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {isPartial && (
+            <span className="text-xs text-amber-400/80 bg-amber-400/10 px-2 py-0.5 rounded">
+              Loading full data...
+            </span>
+          )}
           {updatedAt && (
             <span className="text-xs text-zinc-500">
               {timeAgo(updatedAt)}
