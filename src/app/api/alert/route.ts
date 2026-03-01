@@ -46,16 +46,26 @@ function formatChange(value: number): string {
   return `${sign}${value.toFixed(2)}%`;
 }
 
-function buildHourlyMessage(surging: AggregatedCoinOI[], dropping: AggregatedCoinOI[]): string {
+function getKSTTimeStr(): string {
   const now = new Date();
-  const timeStr = now.toLocaleTimeString('en-US', {
+  return now.toLocaleString('ko-KR', {
+    month: '2-digit',
+    day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-    timeZone: 'UTC',
+    timeZone: 'Asia/Seoul',
   });
+}
 
-  let msg = `🔔 <b>1H OI Movers</b> (${timeStr} UTC)\n`;
+function buildHourlyMessage(
+  surging: AggregatedCoinOI[],
+  dropping: AggregatedCoinOI[],
+  topOI: AggregatedCoinOI[],
+): string {
+  const timeStr = getKSTTimeStr();
+
+  let msg = `🔔 <b>1H OI Movers</b> (${timeStr} KST)\n`;
 
   if (surging.length > 0) {
     msg += '\n📈 <b>급등 Top 5</b>\n';
@@ -73,6 +83,15 @@ function buildHourlyMessage(surging: AggregatedCoinOI[], dropping: AggregatedCoi
     }
   }
 
+  if (topOI.length > 0) {
+    msg += '\n💰 <b>OI 규모 Top 5</b>\n';
+    for (let i = 0; i < topOI.length; i++) {
+      const c = topOI[i];
+      const change = c.oiChange1h !== null ? `  ${formatChange(c.oiChange1h)}` : '';
+      msg += `${i + 1}. <b>${c.symbol}</b>  ${formatUsd(c.totalOI)}${change}\n`;
+    }
+  }
+
   return msg;
 }
 
@@ -80,7 +99,8 @@ function buildThresholdMessage(coin: AggregatedCoinOI): string {
   const change = coin.oiChange1h!;
   const emoji = change > 0 ? '🚨📈' : '🚨📉';
   const label = change > 0 ? '급등' : '급락';
-  return `${emoji} <b>OI ${label} 감지!</b>\n<b>${coin.symbol}</b>  ${formatChange(change)}  (OI: ${formatUsd(coin.totalOI)})`;
+  const timeStr = getKSTTimeStr();
+  return `${emoji} <b>OI ${label} 감지!</b> (${timeStr} KST)\n<b>${coin.symbol}</b>  ${formatChange(change)}  (OI: ${formatUsd(coin.totalOI)})`;
 }
 
 export async function GET(request: NextRequest) {
@@ -131,7 +151,8 @@ export async function GET(request: NextRequest) {
     // --- 1. Hourly Top 5 Report ---
     const surging = sorted.slice(0, 5);
     const dropping = sorted.slice(-5).reverse();
-    const hourlyMsg = buildHourlyMessage(surging, dropping);
+    const topOI = [...withChange].sort((a, b) => b.totalOI - a.totalOI).slice(0, 5);
+    const hourlyMsg = buildHourlyMessage(surging, dropping, topOI);
     const sent = await sendTelegramMessage(hourlyMsg);
     if (sent) messagesSent++;
 
