@@ -47,11 +47,22 @@ export async function saveOISnapshot(
   // Save to Supabase if configured
   if (supabase) {
     try {
-      await supabase.from('oi_snapshots').insert({
+      const row: Record<string, unknown> = {
         created_at: new Date(now).toISOString(),
         data: jsonData,
-        prices: jsonPrices,
-      });
+      };
+      // Only include prices if column exists (avoid error on old schema)
+      if (Object.keys(jsonPrices).length > 0) {
+        row.prices = jsonPrices;
+      }
+      const { error } = await supabase.from('oi_snapshots').insert(row);
+      // If prices column doesn't exist yet, retry without it
+      if (error && error.message?.includes('prices')) {
+        await supabase.from('oi_snapshots').insert({
+          created_at: new Date(now).toISOString(),
+          data: jsonData,
+        });
+      }
 
       // Cleanup old rows every ~10 saves
       saveCounter++;
@@ -91,7 +102,7 @@ async function getSnapshotAt(hoursAgo: number): Promise<SnapshotResult | null> {
 
       const { data, error } = await supabase
         .from('oi_snapshots')
-        .select('created_at, data, prices')
+        .select('*')
         .gte('created_at', minTs)
         .lte('created_at', maxTs)
         .order('created_at', { ascending: true })
