@@ -9,28 +9,34 @@ interface OIMoversProps {
 
 export function OIMovers({ data }: OIMoversProps) {
   const withChange = data.filter((c) => c.oiChange24h !== null && c.marketCap > 0);
+  const hasRealData = withChange.length > 0;
 
-  if (withChange.length === 0) {
-    return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-        <p className="text-xs text-zinc-500 text-center">
-          OI change data will appear after ~1 hour of tracking
-        </p>
-      </div>
-    );
+  // Real data available: sort by 24h change
+  // No real data: preview mode - sort by OI/MC ratio as proxy
+  let surging: AggregatedCoinOI[];
+  let dropping: AggregatedCoinOI[];
+
+  if (hasRealData) {
+    const sorted = [...withChange].sort((a, b) => (b.oiChange24h ?? 0) - (a.oiChange24h ?? 0));
+    surging = sorted.slice(0, 5);
+    dropping = sorted.slice(-5).reverse();
+  } else {
+    const withMc = data.filter((c) => c.marketCap > 0);
+    const byRatio = [...withMc].sort((a, b) => b.oiMcRatio - a.oiMcRatio);
+    surging = byRatio.slice(0, 5);
+    dropping = byRatio.slice(-5).reverse();
   }
-
-  const sorted = [...withChange].sort((a, b) => (b.oiChange24h ?? 0) - (a.oiChange24h ?? 0));
-  const surging = sorted.slice(0, 5);
-  const dropping = sorted.slice(-5).reverse();
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      {/* OI Surge */}
+      {/* OI Surge / High OI/MC */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
         <h3 className="text-xs font-medium text-zinc-400 uppercase mb-3 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-green-500" />
-          24h OI Surge Top 5
+          {hasRealData ? '24h OI Surge Top 5' : 'Highest OI/MC Ratio Top 5'}
+          {!hasRealData && (
+            <span className="text-[10px] text-zinc-600 normal-case ml-1">(24h data after ~1hr)</span>
+          )}
         </h3>
         <div className="space-y-2">
           {surging.map((coin, i) => (
@@ -43,19 +49,22 @@ export function OIMovers({ data }: OIMoversProps) {
                 <span className="text-sm font-medium text-zinc-200">{coin.symbol}</span>
                 <span className="text-xs text-zinc-500">{formatUsd(coin.totalOI)}</span>
               </div>
-              <span className="text-sm font-bold text-green-400">
-                {formatPercent(coin.oiChange24h)}
+              <span className={`text-sm font-bold ${hasRealData ? 'text-green-400' : 'text-zinc-300'}`}>
+                {hasRealData ? formatPercent(coin.oiChange24h) : `${(coin.oiMcRatio * 100).toFixed(2)}%`}
               </span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* OI Drop */}
+      {/* OI Drop / Low OI/MC */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
         <h3 className="text-xs font-medium text-zinc-400 uppercase mb-3 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-red-500" />
-          24h OI Drop Top 5
+          {hasRealData ? '24h OI Drop Top 5' : 'Lowest OI/MC Ratio Top 5'}
+          {!hasRealData && (
+            <span className="text-[10px] text-zinc-600 normal-case ml-1">(24h data after ~1hr)</span>
+          )}
         </h3>
         <div className="space-y-2">
           {dropping.map((coin, i) => (
@@ -68,8 +77,8 @@ export function OIMovers({ data }: OIMoversProps) {
                 <span className="text-sm font-medium text-zinc-200">{coin.symbol}</span>
                 <span className="text-xs text-zinc-500">{formatUsd(coin.totalOI)}</span>
               </div>
-              <span className="text-sm font-bold text-red-400">
-                {formatPercent(coin.oiChange24h)}
+              <span className={`text-sm font-bold ${hasRealData ? 'text-red-400' : 'text-zinc-300'}`}>
+                {hasRealData ? formatPercent(coin.oiChange24h) : `${(coin.oiMcRatio * 100).toFixed(2)}%`}
               </span>
             </div>
           ))}
