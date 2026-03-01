@@ -154,6 +154,7 @@ export async function GET() {
           coin.name = data.name;
           coin.coingeckoId = data.id;
           coin.image = data.image;
+          coin.priceChange24h = data.priceChange24h;
         }
       }
       if (unmatchedIds.length > 0) {
