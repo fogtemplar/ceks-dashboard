@@ -49,53 +49,52 @@ export async function GET() {
       const realPrice = multiplier > 1 ? exchangePrice / multiplier : exchangePrice;
 
       // Supply from CoinGecko (cached 1hr)
-      // Multiple tokens can share the same symbol → pick the one with closest price
       const candidates = supplyMap.get(base) ?? supplyMap.get(symbol) ?? [];
       let supply: CoinSupplyData | undefined;
 
-      if (candidates.length === 1) {
-        // Single match: validate price (>80% diff = wrong token)
-        const c = candidates[0];
-        if (realPrice > 0 && c.cgPrice > 0) {
-          const ratio = realPrice / c.cgPrice;
-          supply = (ratio >= PRICE_RATIO_MIN && ratio <= PRICE_RATIO_MAX) ? c : undefined;
-        } else {
-          supply = c;
-        }
-      } else if (candidates.length > 1 && realPrice > 0) {
-        // Multiple matches: pick closest price
-        let bestDiff = Infinity;
+      // Priority 1: explicit manual mapping (CANONICAL_TO_COINGECKO)
+      const manualCgId = canonicalToCoinGeckoId(symbol, symbolMap) ??
+                         canonicalToCoinGeckoId(base, symbolMap);
+      if (manualCgId) {
         for (const c of candidates) {
-          if (c.cgPrice <= 0) continue;
-          const diff = Math.abs(Math.log(realPrice / c.cgPrice));
-          if (diff < bestDiff) {
-            bestDiff = diff;
-            supply = c;
-          }
+          if (c.id === manualCgId) { supply = c; break; }
         }
-        // Reject if even best match is >5x off
-        if (supply && supply.cgPrice > 0) {
-          const ratio = realPrice / supply.cgPrice;
-          if (ratio < PRICE_RATIO_MIN || ratio > PRICE_RATIO_MAX) supply = undefined;
-        }
-      } else if (candidates.length > 1) {
-        supply = candidates[0]; // no price → use highest MC
-      }
-
-      // Fallback: try canonical → CoinGecko ID mapping
-      if (!supply) {
-        const cgId = canonicalToCoinGeckoId(symbol, symbolMap) ??
-                     canonicalToCoinGeckoId(base, symbolMap);
-        if (cgId) {
+        if (!supply) {
           for (const [, entries] of supplyMap) {
             for (const data of entries) {
-              if (data.id === cgId) {
-                supply = data;
-                break;
-              }
+              if (data.id === manualCgId) { supply = data; break; }
             }
             if (supply) break;
           }
+        }
+      }
+
+      // Priority 2: price-based matching from candidates
+      if (!supply) {
+        if (candidates.length === 1) {
+          const c = candidates[0];
+          if (realPrice > 0 && c.cgPrice > 0) {
+            const ratio = realPrice / c.cgPrice;
+            supply = (ratio >= PRICE_RATIO_MIN && ratio <= PRICE_RATIO_MAX) ? c : undefined;
+          } else {
+            supply = c;
+          }
+        } else if (candidates.length > 1 && realPrice > 0) {
+          let bestDiff = Infinity;
+          for (const c of candidates) {
+            if (c.cgPrice <= 0) continue;
+            const diff = Math.abs(Math.log(realPrice / c.cgPrice));
+            if (diff < bestDiff) {
+              bestDiff = diff;
+              supply = c;
+            }
+          }
+          if (supply && supply.cgPrice > 0) {
+            const ratio = realPrice / supply.cgPrice;
+            if (ratio < PRICE_RATIO_MIN || ratio > PRICE_RATIO_MAX) supply = undefined;
+          }
+        } else if (candidates.length > 1) {
+          supply = candidates[0];
         }
       }
 
