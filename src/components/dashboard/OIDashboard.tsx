@@ -7,6 +7,7 @@ import { OITable } from './OITable';
 import { OIChart } from './OIChart';
 import { PriceOIChart } from './PriceOIChart';
 import { ExchangeComparison } from './ExchangeComparison';
+import { OIMovers } from './OIMovers';
 import { Spinner } from '@/components/ui/Spinner';
 import { timeAgo } from '@/lib/format';
 
@@ -77,6 +78,9 @@ export function OIDashboard() {
           </button>
         </div>
       </div>
+
+      {/* OI Movers - Surge/Drop Top 5 */}
+      <OIMovers data={data} />
 
       {/* Stats Cards */}
       <StatsCards data={data} />

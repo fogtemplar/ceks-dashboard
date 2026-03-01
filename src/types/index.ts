@@ -19,6 +19,8 @@ export interface AggregatedCoinOI {
     okx: number | null;
     bitget: number | null;
   };
+  oiChange1h: number | null;
+  oiChange6h: number | null;
   oiChange24h: number | null;
   oiMcIndex: number;
   oiMcRatio: number;
@@ -64,6 +66,8 @@ export type SortField =
   | 'price'
   | 'marketCap'
   | 'totalOI'
+  | 'oiChange1h'
+  | 'oiChange6h'
   | 'oiChange24h'
   | 'oiMcIndex'
   | 'oiMcRatio';

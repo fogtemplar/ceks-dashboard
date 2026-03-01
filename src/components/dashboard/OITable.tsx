@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import type { AggregatedCoinOI, SortField, SortDirection } from '@/types';
-import { formatUsd, formatPrice } from '@/lib/format';
+import { formatUsd, formatPrice, formatPercent } from '@/lib/format';
 import { getIndexColor, getIndexTier, getIndexBgColor } from '@/lib/oi-mc-index';
 import { SortHeader } from '@/components/ui/SortHeader';
 import { FilterBar } from '@/components/ui/FilterBar';
@@ -11,6 +11,12 @@ interface OITableProps {
   data: AggregatedCoinOI[];
   onSelectCoin: (symbol: string) => void;
   selectedCoin: string | null;
+}
+
+function ChangeCell({ value }: { value: number | null }) {
+  if (value === null) return <span className="text-zinc-600">-</span>;
+  const color = value > 0 ? 'text-green-400' : value < 0 ? 'text-red-400' : 'text-zinc-400';
+  return <span className={`${color} text-xs font-medium`}>{formatPercent(value)}</span>;
 }
 
 export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
@@ -74,6 +80,14 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
           aVal = a.totalOI;
           bVal = b.totalOI;
           break;
+        case 'oiChange1h':
+          aVal = a.oiChange1h ?? 0;
+          bVal = b.oiChange1h ?? 0;
+          break;
+        case 'oiChange6h':
+          aVal = a.oiChange6h ?? 0;
+          bVal = b.oiChange6h ?? 0;
+          break;
         case 'oiChange24h':
           aVal = a.oiChange24h ?? 0;
           bVal = b.oiChange24h ?? 0;
@@ -108,7 +122,7 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
       />
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-800">
-        <table className="w-full min-w-[900px]">
+        <table className="w-full min-w-[1100px]">
           <thead className="bg-zinc-900/80">
             <tr>
               <th className="px-3 py-3 text-left text-xs font-medium text-zinc-400 uppercase w-10">
@@ -173,6 +187,27 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
               <SortHeader
                 label="Grade"
                 field="oiMcIndex"
+                currentSort={sortField}
+                direction={sortDir}
+                onSort={handleSort}
+              />
+              <SortHeader
+                label="1h"
+                field="oiChange1h"
+                currentSort={sortField}
+                direction={sortDir}
+                onSort={handleSort}
+              />
+              <SortHeader
+                label="6h"
+                field="oiChange6h"
+                currentSort={sortField}
+                direction={sortDir}
+                onSort={handleSort}
+              />
+              <SortHeader
+                label="24h"
+                field="oiChange24h"
                 currentSort={sortField}
                 direction={sortDir}
                 onSort={handleSort}
@@ -278,6 +313,15 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                   })() : (
                     <span className="text-sm text-zinc-600">-</span>
                   )}
+                </td>
+                <td className="px-3 py-3 text-right">
+                  <ChangeCell value={coin.oiChange1h} />
+                </td>
+                <td className="px-3 py-3 text-right">
+                  <ChangeCell value={coin.oiChange6h} />
+                </td>
+                <td className="px-3 py-3 text-right">
+                  <ChangeCell value={coin.oiChange24h} />
                 </td>
               </tr>
             ))}
