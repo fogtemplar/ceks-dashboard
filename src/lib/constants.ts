@@ -17,7 +17,7 @@ export const CACHE_TTL = {
 
 export const BINANCE_BATCH_CONCURRENCY = 10;
 export const TOP_COINS_LIMIT = 250;
-export const COINGECKO_PAGES = 12; // 250 x 12 = 3000 coins
+export const COINGECKO_PAGES = 20; // 250 x 20 = 5000 coins
 
 // Fetch timeouts (ms)
 export const FETCH_TIMEOUT = 15_000;        // 15s for single exchange API

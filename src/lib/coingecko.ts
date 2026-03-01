@@ -5,7 +5,7 @@ import type { CoinSupplyData } from '@/types';
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const QUICK_PAGES = 5; // 1250 coins - covers most futures coins
+const QUICK_PAGES = 8; // 2000 coins - covers most futures coins
 
 // Internal: fetch N pages from CoinGecko
 async function fetchPages(maxPages: number): Promise<Map<string, CoinSupplyData[]>> {
