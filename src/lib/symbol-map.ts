@@ -103,6 +103,7 @@ const CANONICAL_TO_COINGECKO: Record<string, string> = {
   HANA: 'hana-network',
   BULLA: 'bulla-3',
   PTB: 'portal-to-bitcoin',
+  LAYER: 'solayer',
 };
 
 let dynamicMap: Record<string, string> | null = null;
