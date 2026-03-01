@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendTelegramMessage, isTelegramConfigured } from '@/lib/telegram';
 import { supabase } from '@/lib/supabase';
-import { formatUsd } from '@/lib/format';
+import { formatUsd, formatPrice } from '@/lib/format';
 import type { AggregatedCoinOI, DashboardResponse } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -46,6 +46,14 @@ function formatChange(value: number): string {
   return `${sign}${value.toFixed(2)}%`;
 }
 
+function formatPriceWithChange(coin: AggregatedCoinOI): string {
+  const p = formatPrice(coin.price);
+  if (coin.priceChange24h !== null) {
+    return `${p} (${formatChange(coin.priceChange24h)})`;
+  }
+  return p;
+}
+
 function getKSTTimeStr(): string {
   const now = new Date();
   return now.toLocaleString('ko-KR', {
@@ -71,7 +79,7 @@ function buildHourlyMessage(
     msg += '\n📈 <b>급등 Top 5</b>\n';
     for (let i = 0; i < surging.length; i++) {
       const c = surging[i];
-      msg += `${i + 1}. <b>${c.symbol}</b>  ${formatChange(c.oiChange1h!)}  (${formatUsd(c.totalOI)})\n`;
+      msg += `${i + 1}. <b>${c.symbol}</b>  ${formatChange(c.oiChange1h!)}  ${formatPriceWithChange(c)}\n`;
     }
   }
 
@@ -79,7 +87,7 @@ function buildHourlyMessage(
     msg += '\n📉 <b>급락 Top 5</b>\n';
     for (let i = 0; i < dropping.length; i++) {
       const c = dropping[i];
-      msg += `${i + 1}. <b>${c.symbol}</b>  ${formatChange(c.oiChange1h!)}  (${formatUsd(c.totalOI)})\n`;
+      msg += `${i + 1}. <b>${c.symbol}</b>  ${formatChange(c.oiChange1h!)}  ${formatPriceWithChange(c)}\n`;
     }
   }
 
@@ -87,7 +95,7 @@ function buildHourlyMessage(
     msg += '\n🔥 <b>OI/MC Top 5</b>\n';
     for (let i = 0; i < topOiMc.length; i++) {
       const c = topOiMc[i];
-      msg += `${i + 1}. <b>${c.symbol}</b>  ${(c.oiMcRatio * 100).toFixed(2)}%  (${formatUsd(c.totalOI)})\n`;
+      msg += `${i + 1}. <b>${c.symbol}</b>  ${(c.oiMcRatio * 100).toFixed(2)}%  ${formatPriceWithChange(c)}\n`;
     }
   }
 

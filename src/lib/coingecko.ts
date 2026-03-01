@@ -55,6 +55,7 @@ async function fetchPages(maxPages: number): Promise<Map<string, CoinSupplyData[
           circulatingSupply: coin.circulating_supply ?? 0,
           image: coin.image ?? '',
           cgPrice: coin.current_price ?? 0,
+          priceChange24h: coin.price_change_percentage_24h ?? null,
         };
         const arr = result.get(sym);
         if (arr) {
@@ -139,6 +140,7 @@ export async function fetchCoinsByIds(
         circulatingSupply: coin.circulating_supply ?? 0,
         image: coin.image ?? '',
         cgPrice: coin.current_price ?? 0,
+        priceChange24h: coin.price_change_percentage_24h ?? null,
       });
     }
 

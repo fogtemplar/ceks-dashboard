@@ -124,6 +124,7 @@ export async function GET() {
         oiChange24h: null,
         oiMcIndex: 0,
         oiMcRatio: 0,
+        priceChange24h: supply?.priceChange24h ?? null,
       });
     }
 

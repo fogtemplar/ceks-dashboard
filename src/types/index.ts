@@ -24,6 +24,7 @@ export interface AggregatedCoinOI {
   oiChange24h: number | null;
   oiMcIndex: number;
   oiMcRatio: number;
+  priceChange24h: number | null;
 }
 
 export interface OIHistoryPoint {
@@ -53,6 +54,7 @@ export interface CoinSupplyData {
   circulatingSupply: number;
   image: string;
   cgPrice: number; // CoinGecko price for symbol disambiguation
+  priceChange24h: number | null;
 }
 
 export interface DashboardResponse {
