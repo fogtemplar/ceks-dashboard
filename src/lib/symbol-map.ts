@@ -54,7 +54,7 @@ const CANONICAL_TO_COINGECKO: Record<string, string> = {
   FLOW: 'flow',
   XTZ: 'tezos',
   CFX: 'conflux-token',
-  DYDX: 'dydx',
+  DYDX: 'dydx-chain',
   BONK: 'bonk',
   '1000BONK': 'bonk',
   FLOKI: 'floki',
@@ -105,7 +105,6 @@ const CANONICAL_TO_COINGECKO: Record<string, string> = {
   PTB: 'portal-to-bitcoin',
   LAYER: 'solayer',
   SKY: 'sky',
-  DYDX: 'dydx-chain',
 };
 
 let dynamicMap: Record<string, string> | null = null;
