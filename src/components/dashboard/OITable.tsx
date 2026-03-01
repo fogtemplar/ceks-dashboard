@@ -157,40 +157,6 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                 onSort={handleSort}
               />
               <SortHeader
-                label="Market Cap"
-                field="marketCap"
-                currentSort={sortField}
-                direction={sortDir}
-                onSort={handleSort}
-              />
-              <SortHeader
-                label="Total OI"
-                field="totalOI"
-                currentSort={sortField}
-                direction={sortDir}
-                onSort={handleSort}
-              />
-              {exchanges.binance && (
-                <th className="px-3 py-3 text-right text-xs font-medium text-yellow-500/70 uppercase whitespace-nowrap">
-                  Binance
-                </th>
-              )}
-              {exchanges.bybit && (
-                <th className="px-3 py-3 text-right text-xs font-medium text-orange-500/70 uppercase whitespace-nowrap">
-                  Bybit
-                </th>
-              )}
-              {exchanges.okx && (
-                <th className="px-3 py-3 text-right text-xs font-medium text-zinc-400 uppercase whitespace-nowrap">
-                  OKX
-                </th>
-              )}
-              {exchanges.bitget && (
-                <th className="px-3 py-3 text-right text-xs font-medium text-cyan-500/70 uppercase whitespace-nowrap">
-                  Bitget
-                </th>
-              )}
-              <SortHeader
                 label="OI/MC"
                 field="oiMcRatio"
                 currentSort={sortField}
@@ -200,6 +166,20 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
               <SortHeader
                 label="Grade"
                 field="oiMcIndex"
+                currentSort={sortField}
+                direction={sortDir}
+                onSort={handleSort}
+              />
+              <SortHeader
+                label="Market Cap"
+                field="marketCap"
+                currentSort={sortField}
+                direction={sortDir}
+                onSort={handleSort}
+              />
+              <SortHeader
+                label="Total OI"
+                field="totalOI"
                 currentSort={sortField}
                 direction={sortDir}
                 onSort={handleSort}
@@ -225,6 +205,26 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                 direction={sortDir}
                 onSort={handleSort}
               />
+              {exchanges.binance && (
+                <th className="px-3 py-3 text-right text-xs font-medium text-yellow-500/70 uppercase whitespace-nowrap">
+                  Binance
+                </th>
+              )}
+              {exchanges.bybit && (
+                <th className="px-3 py-3 text-right text-xs font-medium text-orange-500/70 uppercase whitespace-nowrap">
+                  Bybit
+                </th>
+              )}
+              {exchanges.okx && (
+                <th className="px-3 py-3 text-right text-xs font-medium text-zinc-400 uppercase whitespace-nowrap">
+                  OKX
+                </th>
+              )}
+              {exchanges.bitget && (
+                <th className="px-3 py-3 text-right text-xs font-medium text-cyan-500/70 uppercase whitespace-nowrap">
+                  Bitget
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800/50">
@@ -267,40 +267,6 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                   {coin.price > 0 ? formatPrice(coin.price) : '-'}
                 </td>
                 <td className="px-3 py-3 text-right text-sm text-zinc-300">
-                  {coin.marketCap > 0 ? formatUsd(coin.marketCap) : '-'}
-                </td>
-                <td className="px-3 py-3 text-right text-sm font-medium text-zinc-200">
-                  {formatUsd(coin.totalOI)}
-                </td>
-                {exchanges.binance && (
-                  <td className="px-3 py-3 text-right text-sm text-zinc-400">
-                    {coin.oiByExchange.binance
-                      ? formatUsd(coin.oiByExchange.binance)
-                      : '-'}
-                  </td>
-                )}
-                {exchanges.bybit && (
-                  <td className="px-3 py-3 text-right text-sm text-zinc-400">
-                    {coin.oiByExchange.bybit
-                      ? formatUsd(coin.oiByExchange.bybit)
-                      : '-'}
-                  </td>
-                )}
-                {exchanges.okx && (
-                  <td className="px-3 py-3 text-right text-sm text-zinc-400">
-                    {coin.oiByExchange.okx
-                      ? formatUsd(coin.oiByExchange.okx)
-                      : '-'}
-                  </td>
-                )}
-                {exchanges.bitget && (
-                  <td className="px-3 py-3 text-right text-sm text-zinc-400">
-                    {coin.oiByExchange.bitget
-                      ? formatUsd(coin.oiByExchange.bitget)
-                      : '-'}
-                  </td>
-                )}
-                <td className="px-3 py-3 text-right text-sm text-zinc-300">
                   {coin.marketCap > 0 ? `${(coin.oiMcRatio * 100).toFixed(2)}%` : '-'}
                 </td>
                 <td className="px-3 py-3 text-right">
@@ -334,6 +300,12 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                     <span className="text-sm text-zinc-600">-</span>
                   )}
                 </td>
+                <td className="px-3 py-3 text-right text-sm text-zinc-300">
+                  {coin.marketCap > 0 ? formatUsd(coin.marketCap) : '-'}
+                </td>
+                <td className="px-3 py-3 text-right text-sm font-medium text-zinc-200">
+                  {formatUsd(coin.totalOI)}
+                </td>
                 <td className="px-3 py-3 text-right">
                   <ChangeCell value={coin.oiChange1h} />
                 </td>
@@ -343,6 +315,34 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                 <td className="px-3 py-3 text-right">
                   <ChangeCell value={coin.oiChange24h} />
                 </td>
+                {exchanges.binance && (
+                  <td className="px-3 py-3 text-right text-sm text-zinc-400">
+                    {coin.oiByExchange.binance
+                      ? formatUsd(coin.oiByExchange.binance)
+                      : '-'}
+                  </td>
+                )}
+                {exchanges.bybit && (
+                  <td className="px-3 py-3 text-right text-sm text-zinc-400">
+                    {coin.oiByExchange.bybit
+                      ? formatUsd(coin.oiByExchange.bybit)
+                      : '-'}
+                  </td>
+                )}
+                {exchanges.okx && (
+                  <td className="px-3 py-3 text-right text-sm text-zinc-400">
+                    {coin.oiByExchange.okx
+                      ? formatUsd(coin.oiByExchange.okx)
+                      : '-'}
+                  </td>
+                )}
+                {exchanges.bitget && (
+                  <td className="px-3 py-3 text-right text-sm text-zinc-400">
+                    {coin.oiByExchange.bitget
+                      ? formatUsd(coin.oiByExchange.bitget)
+                      : '-'}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
