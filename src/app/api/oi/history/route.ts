@@ -4,6 +4,7 @@ import { fetchBybitOIHistory } from '@/lib/exchanges/bybit';
 import type { OIHistoryPoint } from '@/types';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;

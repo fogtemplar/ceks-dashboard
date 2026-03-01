@@ -8,6 +8,7 @@ import { CACHE_TTL } from '@/lib/constants';
 import type { AggregatedCoinOI, CoinSupplyData, DashboardResponse } from '@/types';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 export async function GET() {
   try {
