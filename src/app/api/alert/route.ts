@@ -84,11 +84,12 @@ function buildThresholdMessage(coin: AggregatedCoinOI): string {
 }
 
 export async function GET(request: NextRequest) {
-  // Verify Vercel Cron secret (skip in dev)
+  // Verify secret (Vercel Cron header OR query param for external cron)
   const cronSecret = process.env.CRON_SECRET;
   if (cronSecret) {
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    const querySecret = request.nextUrl.searchParams.get('secret');
+    if (authHeader !== `Bearer ${cronSecret}` && querySecret !== cronSecret) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
   }
