@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import type { AggregatedCoinOI, SortField, SortDirection } from '@/types';
 import { formatUsd, formatPrice, formatPercent } from '@/lib/format';
-import { getIndexColor, getIndexTier, getIndexBgColor } from '@/lib/oi-mc-index';
+import { getIndexColor } from '@/lib/oi-mc-index';
 import { SortHeader } from '@/components/ui/SortHeader';
 import { FilterBar } from '@/components/ui/FilterBar';
 
@@ -329,15 +329,8 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                 </td>
                 <td className="px-3 py-3 text-right">
                   {coin.marketCap > 0 ? (() => {
-                    const tier = getIndexTier(coin.oiMcIndex);
                     return (
-                      <div className="flex items-center justify-end gap-2">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border ${getIndexBgColor(coin.oiMcIndex)}`}
-                          style={{ color: getIndexColor(coin.oiMcIndex) }}
-                        >
-                          {tier.grade}
-                        </span>
+                      <div className="flex items-center justify-end">
                         <div className="flex flex-col items-end">
                           <div className="w-12 bg-zinc-800 rounded-full h-1.5 overflow-hidden">
                             <div
