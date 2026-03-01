@@ -1,0 +1,15 @@
+name: OI Alert
+
+on:
+  schedule:
+    - cron: '0 * * * *' # every hour
+  workflow_dispatch: # manual trigger
+
+jobs:
+  alert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger OI alert
+        run: |
+          curl -sf "https://oi-dashboard-xi.vercel.app/api/alert?secret=${{ secrets.CRON_SECRET }}" \
+            --max-time 30
