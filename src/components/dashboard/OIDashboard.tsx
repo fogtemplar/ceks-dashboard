@@ -17,11 +17,15 @@ export function OIDashboard() {
   const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
   const chartRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (selectedCoin && chartRef.current) {
-      chartRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const handleSelectCoin = (symbol: string) => {
+    const value = symbol || null;
+    setSelectedCoin(value);
+    if (value && chartRef.current) {
+      setTimeout(() => {
+        chartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }
-  }, [selectedCoin]);
+  };
 
   if (isLoading && data.length === 0) {
     return (
@@ -111,7 +115,7 @@ export function OIDashboard() {
       {/* Main Table */}
       <OITable
         data={data}
-        onSelectCoin={setSelectedCoin}
+        onSelectCoin={handleSelectCoin}
         selectedCoin={selectedCoin}
       />
 

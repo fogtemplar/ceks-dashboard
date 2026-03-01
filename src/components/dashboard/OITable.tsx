@@ -121,6 +121,19 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
         onMcOnlyToggle={() => setMcOnly((v) => !v)}
       />
 
+      {selectedCoin && (
+        <div className="mt-3 px-3 py-2 bg-blue-500/10 border border-blue-500/30 rounded-lg flex items-center gap-2">
+          <span className="text-xs text-blue-400">Selected:</span>
+          <span className="text-sm font-medium text-blue-300">{selectedCoin}</span>
+          <button
+            onClick={() => onSelectCoin('')}
+            className="ml-auto text-xs text-zinc-500 hover:text-zinc-300"
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-800">
         <table className="w-full min-w-[1100px]">
           <thead className="bg-zinc-900/80">
@@ -225,7 +238,14 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
               >
                 <td className="px-3 py-3 text-sm text-zinc-500">{idx + 1}</td>
                 <td className="px-3 py-3">
-                  <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectCoin(coin.symbol);
+                    }}
+                    className="flex items-center gap-2 hover:opacity-80 transition-opacity text-left"
+                  >
                     {coin.image && (
                       <img
                         src={coin.image}
@@ -234,14 +254,14 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                       />
                     )}
                     <div>
-                      <span className="text-sm font-medium text-zinc-200">
+                      <span className="text-sm font-medium text-blue-400 hover:text-blue-300 underline decoration-blue-400/30">
                         {coin.symbol}
                       </span>
                       <span className="text-xs text-zinc-500 ml-2 hidden sm:inline">
                         {coin.name}
                       </span>
                     </div>
-                  </div>
+                  </button>
                 </td>
                 <td className="px-3 py-3 text-right text-sm text-zinc-300">
                   {coin.price > 0 ? formatPrice(coin.price) : '-'}
