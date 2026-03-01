@@ -13,10 +13,57 @@ interface OITableProps {
   selectedCoin: string | null;
 }
 
+type Timeframe = '1h' | '6h' | '24h';
+
+const PRICE_FIELDS: Record<Timeframe, SortField> = {
+  '1h': 'priceChange1h',
+  '6h': 'priceChange6h',
+  '24h': 'priceChange24h',
+};
+
+const OI_FIELDS: Record<Timeframe, SortField> = {
+  '1h': 'oiChange1h',
+  '6h': 'oiChange6h',
+  '24h': 'oiChange24h',
+};
+
+function getPriceChange(coin: AggregatedCoinOI, tf: Timeframe): number | null {
+  if (tf === '1h') return coin.priceChange1h;
+  if (tf === '6h') return coin.priceChange6h;
+  return coin.priceChange24h;
+}
+
+function getOIChange(coin: AggregatedCoinOI, tf: Timeframe): number | null {
+  if (tf === '1h') return coin.oiChange1h;
+  if (tf === '6h') return coin.oiChange6h;
+  return coin.oiChange24h;
+}
+
 function ChangeCell({ value }: { value: number | null }) {
   if (value === null) return <span className="text-zinc-600">-</span>;
   const color = value > 0 ? 'text-green-400' : value < 0 ? 'text-red-400' : 'text-zinc-400';
   return <span className={`${color} text-xs font-medium`}>{formatPercent(value)}</span>;
+}
+
+function TimeframeToggle({ value, onChange }: { value: Timeframe; onChange: (tf: Timeframe) => void }) {
+  const tfs: Timeframe[] = ['1h', '6h', '24h'];
+  return (
+    <div className="inline-flex rounded bg-zinc-800/60 p-0.5 gap-0.5">
+      {tfs.map((tf) => (
+        <button
+          key={tf}
+          onClick={(e) => { e.stopPropagation(); onChange(tf); }}
+          className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+            value === tf
+              ? 'bg-zinc-600 text-zinc-100'
+              : 'text-zinc-500 hover:text-zinc-300'
+          }`}
+        >
+          {tf}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
@@ -30,6 +77,8 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
     bitget: true,
   });
   const [mcOnly, setMcOnly] = useState(true);
+  const [priceTf, setPriceTf] = useState<Timeframe>('1h');
+  const [oiTf, setOiTf] = useState<Timeframe>('1h');
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -46,6 +95,21 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
 
   const allExchangesOn = exchanges.binance && exchanges.bybit && exchanges.okx && exchanges.bitget;
 
+  // When timeframe changes, update sort field if it was pointing to old timeframe
+  const handlePriceTfChange = (tf: Timeframe) => {
+    if (Object.values(PRICE_FIELDS).includes(sortField as SortField)) {
+      setSortField(PRICE_FIELDS[tf]);
+    }
+    setPriceTf(tf);
+  };
+
+  const handleOiTfChange = (tf: Timeframe) => {
+    if (Object.values(OI_FIELDS).includes(sortField as SortField)) {
+      setSortField(OI_FIELDS[tf]);
+    }
+    setOiTf(tf);
+  };
+
   const filtered = useMemo(() => {
     let result = data;
 
@@ -53,8 +117,6 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
       result = result.filter((c) => c.marketCap > 0);
     }
 
-    // Filter by exchange: only show coins that have OI on at least one enabled exchange
-    // Recalculate totalOI based on enabled exchanges
     if (!allExchangesOn) {
       result = result.map((c) => {
         const filteredTotal =
@@ -138,6 +200,9 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
     return result;
   }, [data, search, sortField, sortDir, mcOnly, allExchangesOn, exchanges.binance, exchanges.bybit, exchanges.okx, exchanges.bitget]);
 
+  const activePriceField = PRICE_FIELDS[priceTf];
+  const activeOiField = OI_FIELDS[oiTf];
+
   return (
     <div>
       <FilterBar
@@ -163,7 +228,7 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
       )}
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-800">
-        <table className="w-full min-w-[1100px]">
+        <table className="w-full min-w-[900px]">
           <thead className="bg-zinc-900/80">
             <tr>
               <th className="px-3 py-3 text-left text-xs font-medium text-zinc-400 uppercase w-10">
@@ -184,27 +249,17 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                 direction={sortDir}
                 onSort={handleSort}
               />
-              <SortHeader
-                label="P 1h"
-                field="priceChange1h"
-                currentSort={sortField}
-                direction={sortDir}
-                onSort={handleSort}
-              />
-              <SortHeader
-                label="P 6h"
-                field="priceChange6h"
-                currentSort={sortField}
-                direction={sortDir}
-                onSort={handleSort}
-              />
-              <SortHeader
-                label="P 24h"
-                field="priceChange24h"
-                currentSort={sortField}
-                direction={sortDir}
-                onSort={handleSort}
-              />
+              <th className="px-2 py-3 text-right">
+                <div className="flex items-center justify-end gap-1">
+                  <button
+                    onClick={() => handleSort(activePriceField)}
+                    className="text-xs font-medium text-zinc-400 uppercase hover:text-zinc-200 transition-colors"
+                  >
+                    Price%{sortField === activePriceField ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                  </button>
+                  <TimeframeToggle value={priceTf} onChange={handlePriceTfChange} />
+                </div>
+              </th>
               <SortHeader
                 label="OI/MC"
                 field="oiMcRatio"
@@ -233,27 +288,17 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                 direction={sortDir}
                 onSort={handleSort}
               />
-              <SortHeader
-                label="1h"
-                field="oiChange1h"
-                currentSort={sortField}
-                direction={sortDir}
-                onSort={handleSort}
-              />
-              <SortHeader
-                label="6h"
-                field="oiChange6h"
-                currentSort={sortField}
-                direction={sortDir}
-                onSort={handleSort}
-              />
-              <SortHeader
-                label="24h"
-                field="oiChange24h"
-                currentSort={sortField}
-                direction={sortDir}
-                onSort={handleSort}
-              />
+              <th className="px-2 py-3 text-right">
+                <div className="flex items-center justify-end gap-1">
+                  <button
+                    onClick={() => handleSort(activeOiField)}
+                    className="text-xs font-medium text-zinc-400 uppercase hover:text-zinc-200 transition-colors"
+                  >
+                    OI%{sortField === activeOiField ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ''}
+                  </button>
+                  <TimeframeToggle value={oiTf} onChange={handleOiTfChange} />
+                </div>
+              </th>
               {exchanges.binance && (
                 <th className="px-3 py-3 text-right text-xs font-medium text-yellow-500/70 uppercase whitespace-nowrap">
                   Binance
@@ -315,14 +360,8 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                 <td className="px-3 py-3 text-right text-sm text-zinc-300">
                   {coin.price > 0 ? formatPrice(coin.price) : '-'}
                 </td>
-                <td className={`px-3 py-3 text-right text-sm ${coin.priceChange1h !== null ? (coin.priceChange1h >= 0 ? 'text-emerald-400' : 'text-red-400') : 'text-zinc-500'}`}>
-                  {formatPercent(coin.priceChange1h)}
-                </td>
-                <td className={`px-3 py-3 text-right text-sm ${coin.priceChange6h !== null ? (coin.priceChange6h >= 0 ? 'text-emerald-400' : 'text-red-400') : 'text-zinc-500'}`}>
-                  {formatPercent(coin.priceChange6h)}
-                </td>
-                <td className={`px-3 py-3 text-right text-sm ${coin.priceChange24h !== null ? (coin.priceChange24h >= 0 ? 'text-emerald-400' : 'text-red-400') : 'text-zinc-500'}`}>
-                  {formatPercent(coin.priceChange24h)}
+                <td className="px-2 py-3 text-right">
+                  <ChangeCell value={getPriceChange(coin, priceTf)} />
                 </td>
                 <td className="px-3 py-3 text-right text-sm text-zinc-300">
                   {coin.marketCap > 0 ? `${(coin.oiMcRatio * 100).toFixed(2)}%` : '-'}
@@ -357,14 +396,8 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                 <td className="px-3 py-3 text-right text-sm font-medium text-zinc-200">
                   {formatUsd(coin.totalOI)}
                 </td>
-                <td className="px-3 py-3 text-right">
-                  <ChangeCell value={coin.oiChange1h} />
-                </td>
-                <td className="px-3 py-3 text-right">
-                  <ChangeCell value={coin.oiChange6h} />
-                </td>
-                <td className="px-3 py-3 text-right">
-                  <ChangeCell value={coin.oiChange24h} />
+                <td className="px-2 py-3 text-right">
+                  <ChangeCell value={getOIChange(coin, oiTf)} />
                 </td>
                 {exchanges.binance && (
                   <td className="px-3 py-3 text-right text-sm text-zinc-400">
