@@ -5,7 +5,7 @@ import type { CoinSupplyData } from '@/types';
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const QUICK_PAGES = 2; // 500 coins - fast initial load
+const QUICK_PAGES = 5; // 1250 coins - covers most futures coins
 
 // Internal: fetch N pages from CoinGecko
 async function fetchPages(maxPages: number): Promise<Map<string, CoinSupplyData[]>> {
@@ -106,6 +106,48 @@ export async function fetchCoinSupplyFull(): Promise<Map<string, CoinSupplyData[
 // Check if full supply data is cached
 export function hasFullSupplyCache(): boolean {
   return cache.get<Map<string, CoinSupplyData[]>>('supply:all') !== null;
+}
+
+// Fetch individual coins by CoinGecko ID for coins not found in paginated results
+// Used to fill gaps for coins outside the top 3000 that have a known CoinGecko ID
+export async function fetchCoinsByIds(
+  ids: string[]
+): Promise<Map<string, CoinSupplyData>> {
+  if (ids.length === 0) return new Map();
+
+  const cacheKey = `supply:byid:${ids.sort().join(',')}`;
+  const cached = cache.get<Map<string, CoinSupplyData>>(cacheKey);
+  if (cached) return cached;
+
+  const result = new Map<string, CoinSupplyData>();
+
+  try {
+    // CoinGecko /coins/markets accepts ids parameter (comma-separated, max ~250)
+    const idsParam = ids.slice(0, 100).join(',');
+    const res = await fetchWithTimeout(
+      `${COINGECKO_BASE}/coins/markets?vs_currency=usd&ids=${idsParam}&sparkline=false`
+    );
+    if (res.status === 429 || !res.ok) return result;
+
+    const coins = await res.json();
+    for (const coin of coins) {
+      const sym = coin.symbol.toUpperCase();
+      result.set(coin.id, {
+        id: coin.id,
+        symbol: sym,
+        name: coin.name,
+        circulatingSupply: coin.circulating_supply ?? 0,
+        image: coin.image ?? '',
+        cgPrice: coin.current_price ?? 0,
+      });
+    }
+
+    cache.set(cacheKey, result, CACHE_TTL.SUPPLY);
+  } catch (err) {
+    console.warn('CoinGecko fetchByIds error:', err);
+  }
+
+  return result;
 }
 
 // Legacy alias

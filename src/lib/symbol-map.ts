@@ -87,6 +87,22 @@ const CANONICAL_TO_COINGECKO: Record<string, string> = {
   ZK: 'zksync',
   EIGEN: 'eigenlayer',
   TRUMP: 'official-trump',
+  // Commonly traded futures coins outside CoinGecko top 500
+  ARC: 'ai-rig-complex',
+  BEAT: 'audiera',
+  ENSO: 'enso',
+  PARTI: 'particle-network',
+  HOLO: 'holoworld',
+  AGLD: 'adventure-gold',
+  ELSA: 'elsa',
+  ZKP: 'zkpass',
+  SPACE: 'spacecoin-2',
+  SONIC: 'sonic-svm',
+  WCT: 'connect-token-wct',
+  FIO: 'fio-protocol',
+  HANA: 'hana-network',
+  BULLA: 'bulla-3',
+  PTB: 'portal-to-bitcoin',
 };
 
 let dynamicMap: Record<string, string> | null = null;

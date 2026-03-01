@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchAllExchangeOI, aggregateOI } from '@/lib/exchanges';
-import { fetchCoinSupplyQuick, hasFullSupplyCache } from '@/lib/coingecko';
+import { fetchCoinSupplyQuick, hasFullSupplyCache, fetchCoinsByIds } from '@/lib/coingecko';
 import { buildSymbolMapFromSupply, normalizeMultiplierSymbol, canonicalToCoinGeckoId } from '@/lib/symbol-map';
 import { enrichWithOIMC } from '@/lib/oi-mc-index';
 import { saveOISnapshot, computeAllOIChanges } from '@/lib/oi-snapshots';
@@ -125,6 +125,39 @@ export async function GET() {
         oiMcIndex: 0,
         oiMcRatio: 0,
       });
+    }
+
+    // Resolve missing MC for coins with known CoinGecko IDs
+    const unmatchedIds: string[] = [];
+    const unmatchedCoins: AggregatedCoinOI[] = [];
+    for (const coin of coins) {
+      if (coin.marketCap === 0 && coin.totalOI > 100_000) {
+        const cgId = canonicalToCoinGeckoId(coin.symbol, symbolMap);
+        if (cgId) {
+          unmatchedIds.push(cgId);
+          unmatchedCoins.push(coin);
+        }
+      }
+    }
+
+    if (unmatchedIds.length > 0) {
+      const resolved = await fetchCoinsByIds(unmatchedIds);
+      for (const coin of unmatchedCoins) {
+        const cgId = canonicalToCoinGeckoId(coin.symbol, symbolMap);
+        if (!cgId) continue;
+        const data = resolved.get(cgId);
+        if (!data) continue;
+        const cs = data.circulatingSupply;
+        if (cs > 0 && coin.price > 0) {
+          coin.marketCap = cs * coin.price;
+          coin.name = data.name;
+          coin.coingeckoId = data.id;
+          coin.image = data.image;
+        }
+      }
+      if (unmatchedIds.length > 0) {
+        console.log(`Resolved ${resolved.size}/${unmatchedIds.length} unmatched coins via CoinGecko IDs`);
+      }
     }
 
     // Deduplicate by symbol (keep the one with higher OI if duplicates exist)
