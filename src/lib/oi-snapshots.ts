@@ -92,7 +92,7 @@ interface SnapshotResult {
 
 async function getSnapshotAt(hoursAgo: number): Promise<SnapshotResult | null> {
   const targetTs = Date.now() - hoursAgo * 3600_000;
-  const tolerance = hoursAgo * 3600_000 * 0.3;
+  const tolerance = hoursAgo * 3600_000 * 0.5;
 
   // Try Supabase first
   if (supabase) {
