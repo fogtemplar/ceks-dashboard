@@ -172,6 +172,15 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                 direction={sortDir}
                 onSort={handleSort}
               />
+              <th className="px-3 py-3 text-right text-xs font-medium text-zinc-500 uppercase whitespace-nowrap">
+                P 1h
+              </th>
+              <th className="px-3 py-3 text-right text-xs font-medium text-zinc-500 uppercase whitespace-nowrap">
+                P 6h
+              </th>
+              <th className="px-3 py-3 text-right text-xs font-medium text-zinc-500 uppercase whitespace-nowrap">
+                P 24h
+              </th>
               <SortHeader
                 label="OI/MC"
                 field="oiMcRatio"
@@ -279,17 +288,17 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                     </div>
                   </button>
                 </td>
-                <td className="px-3 py-3 text-right text-sm">
-                  {coin.price > 0 ? (
-                    <div>
-                      <span className="text-zinc-300">{formatPrice(coin.price)}</span>
-                      {coin.priceChange24h !== null && (
-                        <span className={`ml-1 text-xs ${coin.priceChange24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {formatPercent(coin.priceChange24h)}
-                        </span>
-                      )}
-                    </div>
-                  ) : '-'}
+                <td className="px-3 py-3 text-right text-sm text-zinc-300">
+                  {coin.price > 0 ? formatPrice(coin.price) : '-'}
+                </td>
+                <td className={`px-3 py-3 text-right text-sm ${coin.priceChange1h !== null ? (coin.priceChange1h >= 0 ? 'text-emerald-400' : 'text-red-400') : 'text-zinc-500'}`}>
+                  {formatPercent(coin.priceChange1h)}
+                </td>
+                <td className={`px-3 py-3 text-right text-sm ${coin.priceChange6h !== null ? (coin.priceChange6h >= 0 ? 'text-emerald-400' : 'text-red-400') : 'text-zinc-500'}`}>
+                  {formatPercent(coin.priceChange6h)}
+                </td>
+                <td className={`px-3 py-3 text-right text-sm ${coin.priceChange24h !== null ? (coin.priceChange24h >= 0 ? 'text-emerald-400' : 'text-red-400') : 'text-zinc-500'}`}>
+                  {formatPercent(coin.priceChange24h)}
                 </td>
                 <td className="px-3 py-3 text-right text-sm text-zinc-300">
                   {coin.marketCap > 0 ? `${(coin.oiMcRatio * 100).toFixed(2)}%` : '-'}

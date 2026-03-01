@@ -24,6 +24,8 @@ export interface AggregatedCoinOI {
   oiChange24h: number | null;
   oiMcIndex: number;
   oiMcRatio: number;
+  priceChange1h: number | null;
+  priceChange6h: number | null;
   priceChange24h: number | null;
 }
 
