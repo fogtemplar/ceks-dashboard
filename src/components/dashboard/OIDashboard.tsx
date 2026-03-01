@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useOIData } from '@/hooks/use-oi-data';
 import { StatsCards } from './StatsCards';
 import { OITable } from './OITable';
@@ -15,6 +15,13 @@ export function OIDashboard() {
   const { data, updatedAt, isPartial, error, isLoading, isValidating, refresh } =
     useOIData();
   const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedCoin && chartRef.current) {
+      chartRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [selectedCoin]);
 
   if (isLoading && data.length === 0) {
     return (
@@ -85,26 +92,28 @@ export function OIDashboard() {
       {/* Stats Cards */}
       <StatsCards data={data} />
 
+      {/* Detail Section - above table so it's visible when coin is clicked */}
+      <div ref={chartRef}>
+        {selectedCoin ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <PriceOIChart symbol={selectedCoin} />
+            <OIChart symbol={selectedCoin} />
+          </div>
+        ) : (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center justify-center h-[100px]">
+            <p className="text-zinc-500 text-sm">
+              Click a coin in the table to view charts
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Main Table */}
       <OITable
         data={data}
         onSelectCoin={setSelectedCoin}
         selectedCoin={selectedCoin}
       />
-
-      {/* Detail Section */}
-      {selectedCoin ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <PriceOIChart symbol={selectedCoin} />
-          <OIChart symbol={selectedCoin} />
-        </div>
-      ) : (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center justify-center h-[370px]">
-          <p className="text-zinc-500 text-sm">
-            Click a coin in the table to view charts
-          </p>
-        </div>
-      )}
 
       {/* Exchange Comparison */}
       <ExchangeComparison data={data} />

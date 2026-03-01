@@ -220,7 +220,7 @@ export function OITable({ data, onSelectCoin, selectedCoin }: OITableProps) {
                 key={coin.symbol}
                 onClick={() => onSelectCoin(coin.symbol)}
                 className={`hover:bg-zinc-800/50 cursor-pointer transition-colors ${
-                  selectedCoin === coin.symbol ? 'bg-zinc-800/80' : ''
+                  selectedCoin === coin.symbol ? 'bg-blue-500/10 border-l-2 border-l-blue-500' : ''
                 }`}
               >
                 <td className="px-3 py-3 text-sm text-zinc-500">{idx + 1}</td>
