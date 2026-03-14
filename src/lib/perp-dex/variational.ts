@@ -4,6 +4,8 @@ import type { DexFundingData, DexFundingRate } from '@/types/perp-dex';
 const API =
   'https://omni-client-api.prod.ap-northeast-1.variational.io/metadata/stats';
 
+const HOURS_PER_YEAR = 365.25 * 24; // 8766
+
 interface VarListing {
   ticker: string;
   mark_price: string;
@@ -27,8 +29,8 @@ export async function fetchVariational(): Promise<DexFundingData> {
     const rates: DexFundingRate[] = [];
     for (const listing of json.listings ?? []) {
       const intervalHours = (listing.funding_interval_s || 3600) / 3600;
-      const ratePerInterval = parseFloat(listing.funding_rate);
-      if (isNaN(ratePerInterval)) continue;
+      const annualizedRate = parseFloat(listing.funding_rate);
+      if (isNaN(annualizedRate)) continue;
 
       const longOI = parseFloat(listing.open_interest?.long_open_interest) || 0;
       const shortOI =
@@ -36,7 +38,7 @@ export async function fetchVariational(): Promise<DexFundingData> {
 
       rates.push({
         symbol: listing.ticker,
-        fundingRate: (ratePerInterval / 100) / intervalHours, // percent per interval -> decimal per 1h
+        fundingRate: annualizedRate / HOURS_PER_YEAR, // annualized decimal -> decimal per 1h
         fundingIntervalH: intervalHours,
         markPrice: parseFloat(listing.mark_price) || null,
         indexPrice: null,
