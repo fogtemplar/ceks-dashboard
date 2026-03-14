@@ -40,6 +40,12 @@ function fmtRate(rate: number | undefined): string {
   return `${(rate * 100).toFixed(4)}%`;
 }
 
+function fmtInterval(h: number | undefined): string {
+  if (h === undefined) return '';
+  if (h < 1) return `${Math.round(h * 60)}m`;
+  return `${h}h`;
+}
+
 type SortKey = 'symbol' | 'spread' | 'dexCount' | DexName;
 type SortDir = 'asc' | 'desc';
 
@@ -179,6 +185,7 @@ export function FundingTable({
                   </td>
                   {activeDexes.map((d) => {
                     const rate = row.rates[d];
+                    const interval = row.intervals[d];
                     const isMin = rate !== undefined && rate === minR && rateValues.length > 1;
                     const isMax = rate !== undefined && rate === maxR && rateValues.length > 1;
                     return (
@@ -188,7 +195,12 @@ export function FundingTable({
                           rate !== undefined ? rateColor(rate) : 'text-zinc-700'
                         } ${isMin ? 'bg-red-950/20' : ''} ${isMax ? 'bg-green-950/20' : ''}`}
                       >
-                        {fmtRate(rate)}
+                        <span>{fmtRate(rate)}</span>
+                        {interval !== undefined && rate !== undefined && (
+                          <span className="text-[9px] text-zinc-600 ml-0.5">
+                            /{fmtInterval(interval)}
+                          </span>
+                        )}
                       </td>
                     );
                   })}

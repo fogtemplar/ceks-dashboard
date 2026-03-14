@@ -63,6 +63,7 @@ export async function fetchEdgeX(): Promise<DexFundingData> {
           return {
             symbol,
             fundingRate: ratePerInterval / intervalHours, // normalize to 1h
+            fundingIntervalH: intervalHours,
             markPrice: parseFloat(item.markPrice) || null,
             indexPrice: parseFloat(item.indexPrice) || null,
             openInterest: null,

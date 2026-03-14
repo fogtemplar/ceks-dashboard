@@ -29,6 +29,7 @@ export function aggregateFunding(
     string,
     {
       rates: Partial<Record<DexName, number>>;
+      intervals: Partial<Record<DexName, number>>;
       prices: Partial<Record<DexName, number>>;
     }
   >();
@@ -37,17 +38,18 @@ export function aggregateFunding(
     for (const r of dex.rates) {
       const sym = r.symbol.toUpperCase();
       if (!symbolMap.has(sym)) {
-        symbolMap.set(sym, { rates: {}, prices: {} });
+        symbolMap.set(sym, { rates: {}, intervals: {}, prices: {} });
       }
       const entry = symbolMap.get(sym)!;
       entry.rates[dex.dex] = r.fundingRate;
+      entry.intervals[dex.dex] = r.fundingIntervalH;
       if (r.markPrice) entry.prices[dex.dex] = r.markPrice;
     }
   }
 
   const rows: AggregatedFundingRow[] = [];
 
-  for (const [symbol, { rates, prices }] of symbolMap) {
+  for (const [symbol, { rates, intervals, prices }] of symbolMap) {
     const dexEntries = Object.entries(rates) as [DexName, number][];
     if (dexEntries.length === 0) continue;
 
@@ -70,6 +72,7 @@ export function aggregateFunding(
     rows.push({
       symbol,
       rates,
+      intervals,
       prices,
       bestLong,
       bestShort,

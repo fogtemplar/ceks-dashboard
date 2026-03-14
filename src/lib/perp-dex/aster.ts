@@ -49,6 +49,7 @@ export async function fetchAster(): Promise<DexFundingData> {
       rates.push({
         symbol: normalizeSymbol(item.symbol),
         fundingRate: rate / intervalHours, // per-interval decimal -> 1h
+        fundingIntervalH: intervalHours,
         markPrice: parseFloat(item.markPrice) || null,
         indexPrice: parseFloat(item.indexPrice) || null,
         openInterest: null,

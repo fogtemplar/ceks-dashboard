@@ -42,6 +42,7 @@ export async function fetchHyperliquid(): Promise<DexFundingData> {
       rates.push({
         symbol,
         fundingRate: rate8h / 8, // 8h decimal -> 1h
+        fundingIntervalH: 8,
         markPrice: parseFloat(c.markPx) || null,
         indexPrice: parseFloat(c.oraclePx) || null,
         openInterest: parseFloat(c.openInterest) || null,

@@ -36,6 +36,7 @@ export async function fetchExtended(): Promise<DexFundingData> {
       rates.push({
         symbol: m.assetName,
         fundingRate: rate, // already hourly
+        fundingIntervalH: 1,
         markPrice: parseFloat(stats.markPrice) || null,
         indexPrice: parseFloat(stats.indexPrice) || null,
         openInterest: parseFloat(stats.openInterest) || null,

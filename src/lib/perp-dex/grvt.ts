@@ -59,6 +59,7 @@ export async function fetchGRVT(): Promise<DexFundingData> {
           return {
             symbol: symbolFromInstrument(inst.instrument),
             fundingRate: (ratePercent / 100) / intervalHours, // percent per interval -> decimal per 1h
+            fundingIntervalH: intervalHours,
             markPrice: parseFloat(entry.mark_price) || null,
             indexPrice: null,
             openInterest: null,
