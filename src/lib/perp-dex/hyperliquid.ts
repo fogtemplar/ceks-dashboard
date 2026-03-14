@@ -33,15 +33,15 @@ export async function fetchHyperliquid(): Promise<DexFundingData> {
       const m = meta.universe[i];
       if (m.isDelisted) continue;
       const c = ctxs[i];
-      const hourlyRate = parseFloat(c.funding);
-      if (isNaN(hourlyRate)) continue;
+      const rate8h = parseFloat(c.funding);
+      if (isNaN(rate8h)) continue;
 
       let symbol = m.name;
       if (symbol.startsWith('k')) symbol = symbol.slice(1);
 
       rates.push({
         symbol,
-        fundingRate: hourlyRate, // already hourly
+        fundingRate: rate8h / 8, // 8h decimal -> 1h
         markPrice: parseFloat(c.markPx) || null,
         indexPrice: parseFloat(c.oraclePx) || null,
         openInterest: parseFloat(c.openInterest) || null,

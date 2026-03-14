@@ -36,7 +36,7 @@ export async function fetchVariational(): Promise<DexFundingData> {
 
       rates.push({
         symbol: listing.ticker,
-        fundingRate: (ratePerInterval / 100) / intervalHours, // percent to decimal, normalize to 1h
+        fundingRate: ratePerInterval / intervalHours, // decimal per interval -> 1h
         markPrice: parseFloat(listing.mark_price) || null,
         indexPrice: null,
         openInterest: longOI + shortOI || null,
