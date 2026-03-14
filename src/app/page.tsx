@@ -1,5 +1,5 @@
-import { OIDashboard } from "@/components/dashboard/OIDashboard";
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return <OIDashboard />;
+  redirect('/oi');
 }

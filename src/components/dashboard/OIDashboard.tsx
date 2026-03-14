@@ -60,14 +60,9 @@ export function OIDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-100">
-            CEK'S Dashboard
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Futures Open Interest across Binance, Bybit, OKX & Bitget
-          </p>
-        </div>
+        <p className="text-sm text-zinc-500">
+          Futures Open Interest across Binance, Bybit, OKX &amp; Bitget
+        </p>
         <div className="flex items-center gap-3">
           {isPartial && (
             <span className="text-xs text-amber-400/80 bg-amber-400/10 px-2 py-0.5 rounded">
