@@ -21,8 +21,8 @@ export async function fetchLighter(): Promise<DexFundingData> {
 
     const rates: DexFundingRate[] = lighterRates.map((item) => ({
       symbol: item.symbol,
-      fundingRate: item.rate, // already hourly (clamped [-0.5%, +0.5%] per hour)
-      fundingIntervalH: 1,
+      fundingRate: item.rate / 8, // decimal per 8h -> decimal per 1h
+      fundingIntervalH: 8,
       markPrice: null,
       indexPrice: null,
       openInterest: null,
