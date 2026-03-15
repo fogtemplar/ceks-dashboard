@@ -7,18 +7,22 @@ export const RWA_SYMBOLS = new Set([
   'PLTR', 'BA', 'DIS', 'UBER', 'ABNB', 'PYPL', 'SQ', 'SHOP', 'SNOW',
   'HOOD', 'ASML',
   // Tokenized stocks (KR)
-  'SKHYNIX', 'KRCOMP',
+  'SKHYNIX', 'KRCOMP', 'SAMSUNG', 'HYUNDAI', 'HANMI',
   // ETFs & Indices
   'SPY', 'QQQ', 'IWM', 'BOTZ', 'MAGS', 'URA',
+  'IAU', 'SLV',                 // iShares gold/silver ETFs
   'SPX500', 'NDX100', 'DJI',
   // Commodities & precious metals
   'XAU', 'XAG', 'XPT', 'XPD', // gold, silver, platinum, palladium
   'XCU', 'COPPER',              // copper
-  'WTI',                        // oil
-  'GOLD', 'SILVER', 'PAXG',    // PAXG = gold-backed token
+  'WTI', 'CL',                  // oil
+  'NATGAS',                      // natural gas
+  'GOLD', 'SILVER',
+  'PAXG', 'XAUT',               // gold-backed tokens
   // Forex
   'EUR', 'GBP', 'JPY', 'CHF', 'AUD', 'CAD', 'NZD',
   'EURUSD', 'GBPUSD', 'USDJPY', 'NZDUSD',
+  'USDCHF', 'USDKRW', 'AUDUSD', 'USDCAD',
 ]);
 
 export function isRWA(symbol: string): boolean {
