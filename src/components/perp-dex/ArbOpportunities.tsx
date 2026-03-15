@@ -36,11 +36,9 @@ const DEX_LABELS: Record<DexName, string> = {
   extended: 'Extended',
 };
 
-const ALL_DEXES: DexName[] = [
-  'binance', 'okx', 'bybit', 'bitget', 'gate',
-  'hyperliquid', 'lighter', 'aster', 'backpack', 'edgex',
-  'grvt', 'variational', 'extended',
-];
+const CEX_LIST: DexName[] = ['binance', 'okx', 'bybit', 'bitget', 'gate'];
+const DEX_LIST: DexName[] = ['hyperliquid', 'lighter', 'aster', 'backpack', 'edgex', 'grvt', 'variational', 'extended'];
+const ALL_DEXES: DexName[] = [...CEX_LIST, ...DEX_LIST];
 
 function fmtRate(rate: number): string {
   return `${(rate * 100).toFixed(4)}%`;
@@ -192,31 +190,51 @@ export function ArbOpportunities({
       </h2>
 
       {/* Exchange filter */}
-      <div className="flex flex-wrap items-center gap-1.5 mb-3">
-        <span className="text-[10px] text-zinc-500 mr-1">
-          {selectedDexes.length === 0 ? 'All vs All' : selectedDexes.length === 1 ? `${DEX_LABELS[selectedDexes[0]]} vs All` : `${DEX_LABELS[selectedDexes[0]]} vs ${DEX_LABELS[selectedDexes[1]]}`}:
-        </span>
-        {ALL_DEXES.map((d) => (
-          <button
-            key={d}
-            onClick={() => toggleDex(d)}
-            className={`px-2 py-0.5 rounded text-[10px] border transition-colors ${
-              selectedDexes.includes(d)
-                ? 'border-zinc-500 bg-zinc-700 text-zinc-100'
-                : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
-            }`}
-          >
-            {DEX_LABELS[d]}
-          </button>
-        ))}
-        {selectedDexes.length > 0 && (
-          <button
-            onClick={() => setSelectedDexes([])}
-            className="px-2 py-0.5 rounded text-[10px] text-zinc-600 hover:text-zinc-400"
-          >
-            Clear
-          </button>
-        )}
+      <div className="space-y-1.5 mb-3">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-zinc-500 font-medium w-14">
+            {selectedDexes.length === 0 ? 'All vs All' : selectedDexes.length === 1 ? `${DEX_LABELS[selectedDexes[0]]} vs All` : `${DEX_LABELS[selectedDexes[0]]} vs ${DEX_LABELS[selectedDexes[1]]}`}
+          </span>
+          <span className="text-[10px] text-zinc-600 w-7">CEX</span>
+          {CEX_LIST.map((d) => (
+            <button
+              key={d}
+              onClick={() => toggleDex(d)}
+              className={`px-2 py-0.5 rounded text-[10px] border transition-colors ${
+                selectedDexes.includes(d)
+                  ? 'border-zinc-500 bg-zinc-700 text-zinc-100'
+                  : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
+              }`}
+            >
+              {DEX_LABELS[d]}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-14" />
+          <span className="text-[10px] text-zinc-600 w-7">DEX</span>
+          {DEX_LIST.map((d) => (
+            <button
+              key={d}
+              onClick={() => toggleDex(d)}
+              className={`px-2 py-0.5 rounded text-[10px] border transition-colors ${
+                selectedDexes.includes(d)
+                  ? 'border-zinc-500 bg-zinc-700 text-zinc-100'
+                  : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
+              }`}
+            >
+              {DEX_LABELS[d]}
+            </button>
+          ))}
+          {selectedDexes.length > 0 && (
+            <button
+              onClick={() => setSelectedDexes([])}
+              className="px-2 py-0.5 rounded text-[10px] text-zinc-600 hover:text-zinc-400"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Asset type filter */}
