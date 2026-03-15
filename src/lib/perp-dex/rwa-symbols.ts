@@ -13,7 +13,7 @@ export const RWA_SYMBOLS = new Set([
   'SPX500', 'NDX100', 'DJI',
   // Commodities & precious metals
   'XAU', 'XAG', 'XPT', 'XPD', // gold, silver, platinum, palladium
-  'XCU',                        // copper
+  'XCU', 'COPPER',              // copper
   'WTI',                        // oil
   'GOLD', 'SILVER', 'PAXG',    // PAXG = gold-backed token
   // Forex
