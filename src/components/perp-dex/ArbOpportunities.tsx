@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import type { AggregatedFundingRow, DexName } from '@/types/perp-dex';
+import { isRWA } from '@/lib/perp-dex/rwa-symbols';
 
 const DEX_COLORS: Record<DexName, string> = {
   binance: 'text-yellow-400',
@@ -72,6 +73,7 @@ export function ArbOpportunities({
   rows: AggregatedFundingRow[];
 }) {
   const [selectedDexes, setSelectedDexes] = useState<DexName[]>([]);
+  const [assetFilter, setAssetFilter] = useState<'all' | 'crypto' | 'rwa'>('all');
   const [capital, setCapital] = useState('1000');
   const [leverage, setLeverage] = useState('1');
 
@@ -88,6 +90,8 @@ export function ArbOpportunities({
 
     for (const row of rows) {
       if (row.dexCount < 2) continue;
+      if (assetFilter === 'crypto' && isRWA(row.symbol)) continue;
+      if (assetFilter === 'rwa' && !isRWA(row.symbol)) continue;
 
       if (selectedDexes.length === 2) {
         // 2 selected: compare only those two
@@ -175,7 +179,7 @@ export function ArbOpportunities({
 
     results.sort((a, b) => b.spread - a.spread);
     return results.slice(0, 15);
-  }, [rows, selectedDexes]);
+  }, [rows, selectedDexes, assetFilter]);
 
   const capitalNum = parseFloat(capital) || 0;
   const leverageNum = parseFloat(leverage) || 1;
@@ -213,6 +217,30 @@ export function ArbOpportunities({
             Clear
           </button>
         )}
+      </div>
+
+      {/* Asset type filter */}
+      <div className="flex items-center gap-1.5 mb-3">
+        {([
+          { label: 'All', value: 'all' as const },
+          { label: 'Crypto', value: 'crypto' as const },
+          { label: 'RWA', value: 'rwa' as const },
+        ]).map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => setAssetFilter(opt.value)}
+            className={`px-2 py-0.5 rounded text-[10px] border transition-colors ${
+              assetFilter === opt.value
+                ? 'border-zinc-500 bg-zinc-700 text-zinc-100'
+                : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+        <span className="text-[10px] text-zinc-600 ml-1">
+          {assetFilter === 'rwa' ? 'Stocks, Forex, Commodities' : ''}
+        </span>
       </div>
 
       {/* Calculator */}

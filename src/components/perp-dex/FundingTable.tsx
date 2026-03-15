@@ -6,6 +6,7 @@ import type {
   DexFundingData,
   DexName,
 } from '@/types/perp-dex';
+import { isRWA } from '@/lib/perp-dex/rwa-symbols';
 
 const DEX_ORDER: DexName[] = [
   'binance',
@@ -72,6 +73,7 @@ export function FundingTable({
   const [sortKey, setSortKey] = useState<SortKey>('spread');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [minSpread, setMinSpread] = useState(0);
+  const [assetFilter, setAssetFilter] = useState<'all' | 'crypto' | 'rwa'>('all');
 
   const activeDexes = useMemo(
     () => DEX_ORDER.filter((d) => dexes.some((dd) => dd.dex === d && !dd.error)),
@@ -79,9 +81,12 @@ export function FundingTable({
   );
 
   const filtered = useMemo(() => {
-    let result = minSpread > 0
-      ? rows.filter((r) => r.spread * 100 >= minSpread)
-      : rows;
+    let result = rows.filter((r) => {
+      if (minSpread > 0 && r.spread * 100 < minSpread) return false;
+      if (assetFilter === 'crypto' && isRWA(r.symbol)) return false;
+      if (assetFilter === 'rwa' && !isRWA(r.symbol)) return false;
+      return true;
+    });
     if (search) {
       const q = search.toUpperCase();
       result = result.filter((r) => r.symbol.includes(q));
@@ -102,7 +107,7 @@ export function FundingTable({
       return sortDir === 'desc' ? -cmp : cmp;
     });
     return result;
-  }, [rows, search, sortKey, sortDir, minSpread]);
+  }, [rows, search, sortKey, sortDir, minSpread, assetFilter]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -159,6 +164,25 @@ export function FundingTable({
               onClick={() => setMinSpread(opt.value)}
               className={`px-1.5 py-0.5 rounded text-[10px] ${
                 minSpread === opt.value
+                  ? 'bg-zinc-700 text-zinc-200'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+          {([
+            { label: 'All', value: 'all' as const },
+            { label: 'Crypto', value: 'crypto' as const },
+            { label: 'RWA', value: 'rwa' as const },
+          ]).map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setAssetFilter(opt.value)}
+              className={`px-1.5 py-0.5 rounded text-[10px] ${
+                assetFilter === opt.value
                   ? 'bg-zinc-700 text-zinc-200'
                   : 'text-zinc-500 hover:text-zinc-300'
               }`}
