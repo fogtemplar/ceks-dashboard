@@ -9,16 +9,18 @@ import type {
 import { isRWA } from '@/lib/perp-dex/rwa-symbols';
 
 const DEX_ORDER: DexName[] = [
+  // CEX
   'binance',
-  'bybit',
   'okx',
+  'bybit',
   'bitget',
   'gate',
+  // DEX
   'hyperliquid',
+  'lighter',
   'aster',
   'backpack',
   'edgex',
-  'lighter',
   'grvt',
   'variational',
   'extended',

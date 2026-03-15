@@ -18,19 +18,21 @@ import { fetchBitget } from './bitget';
 import { fetchGate } from './gate';
 
 export const DEX_FETCHERS: Record<DexName, () => Promise<DexFundingData>> = {
+  // CEX
+  binance: fetchBinance,
+  okx: fetchOKX,
+  bybit: fetchBybit,
+  bitget: fetchBitget,
+  gate: fetchGate,
+  // DEX
   hyperliquid: fetchHyperliquid,
-  aster: fetchAster,
-  edgex: fetchEdgeX,
   lighter: fetchLighter,
+  aster: fetchAster,
+  backpack: fetchBackpack,
+  edgex: fetchEdgeX,
   grvt: fetchGRVT,
   variational: fetchVariational,
   extended: fetchExtended,
-  backpack: fetchBackpack,
-  binance: fetchBinance,
-  bybit: fetchBybit,
-  okx: fetchOKX,
-  bitget: fetchBitget,
-  gate: fetchGate,
 };
 
 export function aggregateFunding(

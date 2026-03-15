@@ -37,8 +37,8 @@ const DEX_LABELS: Record<DexName, string> = {
 };
 
 const ALL_DEXES: DexName[] = [
-  'binance', 'bybit', 'okx', 'bitget', 'gate',
-  'hyperliquid', 'aster', 'backpack', 'edgex', 'lighter',
+  'binance', 'okx', 'bybit', 'bitget', 'gate',
+  'hyperliquid', 'lighter', 'aster', 'backpack', 'edgex',
   'grvt', 'variational', 'extended',
 ];
 

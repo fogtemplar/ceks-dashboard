@@ -1,17 +1,19 @@
 export type DexName =
+  // CEX
+  | 'binance'
+  | 'okx'
+  | 'bybit'
+  | 'bitget'
+  | 'gate'
+  // DEX
   | 'hyperliquid'
-  | 'aster'
-  | 'edgex'
   | 'lighter'
+  | 'aster'
+  | 'backpack'
+  | 'edgex'
   | 'grvt'
   | 'variational'
-  | 'extended'
-  | 'backpack'
-  | 'binance'
-  | 'bybit'
-  | 'okx'
-  | 'bitget'
-  | 'gate';
+  | 'extended';
 
 export interface DexFundingRate {
   symbol: string;
