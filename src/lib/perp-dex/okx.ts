@@ -65,7 +65,7 @@ export async function fetchOKX(): Promise<DexFundingData> {
             markPrice: null,
             indexPrice: null,
             openInterest: null,
-            nextFundingTime: parseInt(data.nextFundingTime) || null,
+            nextFundingTime: parseInt(data.fundingTime) || null,
           } satisfies DexFundingRate;
         })
       );
