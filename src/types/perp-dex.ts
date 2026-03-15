@@ -27,6 +27,7 @@ export interface DexFundingData {
   dex: DexName;
   label: string;
   rates: DexFundingRate[];
+  nextFundingTime?: number | null; // earliest next funding across all pairs (unix ms)
   error?: string;
 }
 

@@ -49,7 +49,7 @@ function rateColor(rate: number): string {
 
 function fmtRate(rate: number | undefined): string {
   if (rate === undefined) return '-';
-  return `${(rate * 100).toFixed(4)}%`;
+  return `${(rate * 100).toFixed(4)}%/h`;
 }
 
 function fmtInterval(h: number | undefined): string {
@@ -207,11 +207,11 @@ export function FundingTable({
                           rate !== undefined ? rateColor(rate) : 'text-zinc-700'
                         } ${isMin ? 'bg-red-950/20' : ''} ${isMax ? 'bg-green-950/20' : ''}`}
                       >
-                        <span>{fmtRate(rate)}</span>
+                        <div>{fmtRate(rate)}</div>
                         {interval !== undefined && rate !== undefined && (
-                          <span className="text-[9px] text-zinc-600 ml-0.5">
-                            /{fmtInterval(interval)}
-                          </span>
+                          <div className="text-[8px] text-zinc-600">
+                            {fmtInterval(interval)}
+                          </div>
                         )}
                       </td>
                     );

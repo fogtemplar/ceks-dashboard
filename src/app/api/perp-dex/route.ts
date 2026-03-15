@@ -16,14 +16,25 @@ export async function GET() {
   const results = await Promise.allSettled(fetchers.map((fn) => fn()));
 
   const dexes: DexFundingData[] = results.map((r, i) => {
-    if (r.status === 'fulfilled') return r.value;
     const dexNames = Object.keys(DEX_FETCHERS);
-    return {
-      dex: dexNames[i] as DexFundingData['dex'],
-      label: dexNames[i],
-      rates: [],
-      error: (r.reason as Error)?.message ?? 'Unknown error',
-    };
+    if (r.status !== 'fulfilled') {
+      return {
+        dex: dexNames[i] as DexFundingData['dex'],
+        label: dexNames[i],
+        rates: [],
+        error: (r.reason as Error)?.message ?? 'Unknown error',
+      };
+    }
+    const data = r.value;
+    // Compute earliest next funding time across all pairs
+    const now = Date.now();
+    const futureTimes = data.rates
+      .map((r) => r.nextFundingTime)
+      .filter((t): t is number => t !== null && t > now);
+    if (futureTimes.length > 0) {
+      data.nextFundingTime = Math.min(...futureTimes);
+    }
+    return data;
   });
 
   const aggregated = aggregateFunding(dexes);
