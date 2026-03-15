@@ -67,7 +67,7 @@ export async function fetchEdgeX(): Promise<DexFundingData> {
             markPrice: parseFloat(item.markPrice) || null,
             indexPrice: parseFloat(item.indexPrice) || null,
             openInterest: null,
-            nextFundingTime: parseInt(item.fundingTime) || null,
+            nextFundingTime: (parseInt(item.fundingTime) || 0) + intervalMin * 60_000 || null,
           } satisfies DexFundingRate;
         })
       );
