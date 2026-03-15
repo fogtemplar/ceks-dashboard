@@ -8,8 +8,14 @@ import type {
 } from '@/types/perp-dex';
 
 const DEX_ORDER: DexName[] = [
+  'binance',
+  'bybit',
+  'okx',
+  'bitget',
+  'gate',
   'hyperliquid',
   'aster',
+  'backpack',
   'edgex',
   'lighter',
   'grvt',
@@ -18,8 +24,14 @@ const DEX_ORDER: DexName[] = [
 ];
 
 const DEX_LABELS: Record<DexName, string> = {
+  binance: 'Binance',
+  bybit: 'Bybit',
+  okx: 'OKX',
+  bitget: 'Bitget',
+  gate: 'Gate',
   hyperliquid: 'HL',
   aster: 'Aster',
+  backpack: 'BP',
   edgex: 'EdgeX',
   lighter: 'Lighter',
   grvt: 'GRVT',
@@ -132,7 +144,7 @@ export function FundingTable({
         />
         <div className="flex items-center gap-1.5 text-xs text-zinc-500">
           <span>Min DEXes:</span>
-          {[1, 2, 3, 4].map((n) => (
+          {[1, 2, 3, 5, 8].map((n) => (
             <button
               key={n}
               onClick={() => setMinDexCount(n)}

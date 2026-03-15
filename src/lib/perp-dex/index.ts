@@ -10,6 +10,12 @@ import { fetchLighter } from './lighter';
 import { fetchGRVT } from './grvt';
 import { fetchVariational } from './variational';
 import { fetchExtended } from './extended';
+import { fetchBackpack } from './backpack';
+import { fetchBinance } from './binance';
+import { fetchBybit } from './bybit';
+import { fetchOKX } from './okx';
+import { fetchBitget } from './bitget';
+import { fetchGate } from './gate';
 
 export const DEX_FETCHERS: Record<DexName, () => Promise<DexFundingData>> = {
   hyperliquid: fetchHyperliquid,
@@ -19,6 +25,12 @@ export const DEX_FETCHERS: Record<DexName, () => Promise<DexFundingData>> = {
   grvt: fetchGRVT,
   variational: fetchVariational,
   extended: fetchExtended,
+  backpack: fetchBackpack,
+  binance: fetchBinance,
+  bybit: fetchBybit,
+  okx: fetchOKX,
+  bitget: fetchBitget,
+  gate: fetchGate,
 };
 
 export function aggregateFunding(

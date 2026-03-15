@@ -3,8 +3,14 @@
 import type { AggregatedFundingRow, DexName } from '@/types/perp-dex';
 
 const DEX_COLORS: Record<DexName, string> = {
+  binance: 'text-yellow-400',
+  bybit: 'text-orange-300',
+  okx: 'text-white',
+  bitget: 'text-teal-400',
+  gate: 'text-blue-300',
   hyperliquid: 'text-emerald-400',
   aster: 'text-blue-400',
+  backpack: 'text-red-400',
   edgex: 'text-purple-400',
   lighter: 'text-cyan-400',
   grvt: 'text-amber-400',

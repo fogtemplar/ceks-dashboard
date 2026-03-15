@@ -5,7 +5,13 @@ export type DexName =
   | 'lighter'
   | 'grvt'
   | 'variational'
-  | 'extended';
+  | 'extended'
+  | 'backpack'
+  | 'binance'
+  | 'bybit'
+  | 'okx'
+  | 'bitget'
+  | 'gate';
 
 export interface DexFundingRate {
   symbol: string;
