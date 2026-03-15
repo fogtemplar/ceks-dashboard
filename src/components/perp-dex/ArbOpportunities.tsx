@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import type { AggregatedFundingRow, DexName } from '@/types/perp-dex';
 import { isRWA } from '@/lib/perp-dex/rwa-symbols';
+import { DEX_LOGOS } from '@/lib/perp-dex/logos';
 
 const DEX_COLORS: Record<DexName, string> = {
   binance: 'text-yellow-400',
@@ -200,12 +201,14 @@ export function ArbOpportunities({
             <button
               key={d}
               onClick={() => toggleDex(d)}
-              className={`px-2 py-0.5 rounded text-[10px] border transition-colors ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] border transition-colors ${
                 selectedDexes.includes(d)
                   ? 'border-zinc-500 bg-zinc-700 text-zinc-100'
                   : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
               }`}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={DEX_LOGOS[d]} alt="" className="w-3 h-3 rounded-sm" />
               {DEX_LABELS[d]}
             </button>
           ))}
@@ -217,12 +220,14 @@ export function ArbOpportunities({
             <button
               key={d}
               onClick={() => toggleDex(d)}
-              className={`px-2 py-0.5 rounded text-[10px] border transition-colors ${
+              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] border transition-colors ${
                 selectedDexes.includes(d)
                   ? 'border-zinc-500 bg-zinc-700 text-zinc-100'
                   : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
               }`}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={DEX_LOGOS[d]} alt="" className="w-3 h-3 rounded-sm" />
               {DEX_LABELS[d]}
             </button>
           ))}
@@ -322,8 +327,10 @@ export function ArbOpportunities({
 
                 <div className="flex items-center gap-3 text-[11px]">
                   <div>
-                    <div className="text-red-400">
+                    <div className="flex items-center gap-1 text-red-400">
                       Long{' '}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={DEX_LOGOS[row.longDex]} alt="" className="w-3 h-3 rounded-sm" />
                       <span className={DEX_COLORS[row.longDex]}>
                         {DEX_LABELS[row.longDex]}
                       </span>
@@ -331,8 +338,10 @@ export function ArbOpportunities({
                     <div className="text-zinc-500 font-mono">{fmtRate(row.longRate)}/h</div>
                   </div>
                   <div>
-                    <div className="text-green-400">
+                    <div className="flex items-center gap-1 text-green-400">
                       Short{' '}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={DEX_LOGOS[row.shortDex]} alt="" className="w-3 h-3 rounded-sm" />
                       <span className={DEX_COLORS[row.shortDex]}>
                         {DEX_LABELS[row.shortDex]}
                       </span>

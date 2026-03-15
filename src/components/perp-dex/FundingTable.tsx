@@ -7,6 +7,7 @@ import type {
   DexName,
 } from '@/types/perp-dex';
 import { isRWA } from '@/lib/perp-dex/rwa-symbols';
+import { DEX_LOGOS } from '@/lib/perp-dex/logos';
 
 const DEX_ORDER: DexName[] = [
   // CEX
@@ -124,19 +125,25 @@ export function FundingTable({
     label,
     col,
     className,
+    logo,
   }: {
     label: string;
     col: SortKey;
     className?: string;
+    logo?: string;
   }) => (
     <th
       onClick={() => toggleSort(col)}
       className={`px-2 py-2 text-[10px] font-medium text-zinc-500 cursor-pointer hover:text-zinc-300 select-none ${className ?? ''}`}
     >
-      {label}
-      {sortKey === col && (
-        <span className="ml-0.5">{sortDir === 'desc' ? '↓' : '↑'}</span>
-      )}
+      <div className={`flex items-center gap-1 ${className?.includes('text-right') ? 'justify-end' : ''}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {logo && <img src={logo} alt={label} className="w-3.5 h-3.5 rounded-sm" />}
+        <span>{label}</span>
+        {sortKey === col && (
+          <span>{sortDir === 'desc' ? '↓' : '↑'}</span>
+        )}
+      </div>
     </th>
   );
 
@@ -210,6 +217,7 @@ export function FundingTable({
                   label={DEX_LABELS[d]}
                   col={d}
                   className="text-right"
+                  logo={DEX_LOGOS[d]}
                 />
               ))}
               <SortHeader label="Spread" col="spread" className="text-right" />
