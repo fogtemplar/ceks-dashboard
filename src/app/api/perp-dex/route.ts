@@ -35,13 +35,27 @@ export async function GET() {
       };
     }
     const data = r.value;
-    // Compute earliest next funding time across all pairs
+    // Compute next funding time: use the most common one across pairs
     const now = Date.now();
     const futureTimes = data.rates
       .map((r) => r.nextFundingTime)
       .filter((t): t is number => t !== null && t > now);
     if (futureTimes.length > 0) {
-      data.nextFundingTime = Math.min(...futureTimes);
+      // Round to nearest minute to group similar times, then pick the mode
+      const buckets = new Map<number, number>();
+      for (const t of futureTimes) {
+        const rounded = Math.round(t / 60_000) * 60_000;
+        buckets.set(rounded, (buckets.get(rounded) ?? 0) + 1);
+      }
+      let bestTime = futureTimes[0];
+      let bestCount = 0;
+      for (const [t, count] of buckets) {
+        if (count > bestCount) {
+          bestCount = count;
+          bestTime = t;
+        }
+      }
+      data.nextFundingTime = bestTime;
     } else if (data.rates.length > 0) {
       // Fallback: compute from most common funding interval
       const intervals = data.rates.map((r) => r.fundingIntervalH);
