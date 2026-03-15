@@ -10,8 +10,8 @@ export const DEX_LOGOS: Record<DexName, string> = {
   lighter: '/logos/lighter.png',
   aster: '/logos/aster.svg',
   backpack: '/logos/backpack.png',
-  edgex: '/logos/edgex.svg',
+  edgex: '/logos/edgex.png',
   grvt: '/logos/grvt.png',
-  variational: '/logos/variational.svg',
-  extended: '/logos/extended.svg',
+  variational: '/logos/variational.png',
+  extended: '/logos/extended.png',
 };
