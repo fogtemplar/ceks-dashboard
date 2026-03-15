@@ -71,7 +71,7 @@ export function FundingTable({
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('spread');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
-  const [minDexCount, setMinDexCount] = useState(2);
+  const [minSpread, setMinSpread] = useState(0);
 
   const activeDexes = useMemo(
     () => DEX_ORDER.filter((d) => dexes.some((dd) => dd.dex === d && !dd.error)),
@@ -79,7 +79,9 @@ export function FundingTable({
   );
 
   const filtered = useMemo(() => {
-    let result = rows.filter((r) => r.dexCount >= minDexCount);
+    let result = minSpread > 0
+      ? rows.filter((r) => r.spread * 100 >= minSpread)
+      : rows;
     if (search) {
       const q = search.toUpperCase();
       result = result.filter((r) => r.symbol.includes(q));
@@ -100,7 +102,7 @@ export function FundingTable({
       return sortDir === 'desc' ? -cmp : cmp;
     });
     return result;
-  }, [rows, search, sortKey, sortDir, minDexCount]);
+  }, [rows, search, sortKey, sortDir, minSpread]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -143,18 +145,25 @@ export function FundingTable({
           className="bg-zinc-800 border border-zinc-700 rounded-md px-2.5 py-1 text-xs text-zinc-200 placeholder-zinc-600 w-40 focus:outline-none focus:border-zinc-500"
         />
         <div className="flex items-center gap-1.5 text-xs text-zinc-500">
-          <span>Min DEXes:</span>
-          {[1, 2, 3, 5, 8].map((n) => (
+          <span>Spread:</span>
+          {[
+            { label: 'All', value: 0 },
+            { label: '≥0.01%', value: 0.01 },
+            { label: '≥0.05%', value: 0.05 },
+            { label: '≥0.1%', value: 0.1 },
+            { label: '≥0.5%', value: 0.5 },
+            { label: '≥1%', value: 1 },
+          ].map((opt) => (
             <button
-              key={n}
-              onClick={() => setMinDexCount(n)}
+              key={opt.value}
+              onClick={() => setMinSpread(opt.value)}
               className={`px-1.5 py-0.5 rounded text-[10px] ${
-                minDexCount === n
+                minSpread === opt.value
                   ? 'bg-zinc-700 text-zinc-200'
                   : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              {n}+
+              {opt.label}
             </button>
           ))}
         </div>
