@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react';
 import type { AggregatedFundingRow, DexName } from '@/types/perp-dex';
 import { isRWA } from '@/lib/perp-dex/rwa-symbols';
-import { DEX_LOGOS } from '@/lib/perp-dex/logos';
 
 const DEX_COLORS: Record<DexName, string> = {
   binance: 'text-yellow-400',
@@ -207,8 +206,6 @@ export function ArbOpportunities({
                   : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
               }`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={DEX_LOGOS[d]} alt={DEX_LABELS[d]} className="w-3 h-3 rounded-sm inline-block mr-0.5" />
               {DEX_LABELS[d]}
             </button>
           ))}
@@ -226,8 +223,6 @@ export function ArbOpportunities({
                   : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
               }`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={DEX_LOGOS[d]} alt={DEX_LABELS[d]} className="w-3 h-3 rounded-sm inline-block mr-0.5" />
               {DEX_LABELS[d]}
             </button>
           ))}
@@ -327,10 +322,8 @@ export function ArbOpportunities({
 
                 <div className="flex items-center gap-3 text-[11px]">
                   <div>
-                    <div className="flex items-center gap-1 text-red-400">
+                    <div className="text-red-400">
                       Long{' '}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={DEX_LOGOS[row.longDex]} alt="" className="w-3 h-3 rounded-sm" />
                       <span className={DEX_COLORS[row.longDex]}>
                         {DEX_LABELS[row.longDex]}
                       </span>
@@ -338,10 +331,8 @@ export function ArbOpportunities({
                     <div className="text-zinc-500 font-mono">{fmtRate(row.longRate)}/h</div>
                   </div>
                   <div>
-                    <div className="flex items-center gap-1 text-green-400">
+                    <div className="text-green-400">
                       Short{' '}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={DEX_LOGOS[row.shortDex]} alt="" className="w-3 h-3 rounded-sm" />
                       <span className={DEX_COLORS[row.shortDex]}>
                         {DEX_LABELS[row.shortDex]}
                       </span>

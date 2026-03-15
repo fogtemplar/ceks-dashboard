@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import type { DexFundingData, DexName } from '@/types/perp-dex';
-import { DEX_LOGOS } from '@/lib/perp-dex/logos';
 
 const CEX_NAMES: Set<DexName> = new Set(['binance', 'okx', 'bybit', 'bitget', 'gate']);
 
@@ -36,8 +35,6 @@ function DexBadge({ d, now }: { d: DexFundingData; now: number }) {
           d.error ? 'bg-red-500' : 'bg-emerald-500'
         }`}
       />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={DEX_LOGOS[d.dex]} alt={d.label} className="w-3.5 h-3.5 rounded-sm" />
       <span className="font-medium">{d.label}</span>
       <span className="text-zinc-600">
         {d.error ? 'error' : `${d.rates.length}`}
