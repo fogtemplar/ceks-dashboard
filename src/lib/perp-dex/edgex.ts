@@ -32,49 +32,43 @@ export async function fetchEdgeX(): Promise<DexFundingData> {
       return { dex: 'edgex', label: 'EdgeX', rates: [], error: 'No contracts found' };
     }
 
-    // Limit to first 50 contracts to avoid excessive API calls
-    const limited = contracts.slice(0, 50);
+    // Build contract name map
+    const contractMap = new Map<string, EdgeXContract>();
+    for (const c of contracts) {
+      contractMap.set(c.contractId, c);
+    }
 
-    // Fetch funding rates in parallel (batched)
-    const batchSize = 10;
+    // Fetch all funding rates in a single batch call (comma-separated IDs)
+    const ids = contracts.map((c) => c.contractId).join(',');
+    const fundingRes = await fetchWithTimeout(
+      `${FUNDING_URL}?contractId=${ids}`,
+      { timeout: 15000 }
+    );
+    const fundingJson = await fundingRes.json();
+    const items: EdgeXFunding[] = fundingJson?.data ?? [];
+
     const rates: DexFundingRate[] = [];
+    for (const item of items) {
+      const contract = contractMap.get(item.contractId);
+      if (!contract) continue;
 
-    for (let i = 0; i < limited.length; i += batchSize) {
-      const batch = limited.slice(i, i + batchSize);
-      const results = await Promise.allSettled(
-        batch.map(async (c) => {
-          const res = await fetchWithTimeout(
-            `${FUNDING_URL}?contractId=${c.contractId}`,
-            { timeout: 8000 }
-          );
-          const json = await res.json();
-          const items: EdgeXFunding[] = json?.data ?? [];
-          if (items.length === 0) return null;
+      const intervalMin = parseInt(item.fundingRateIntervalMin) || 240;
+      const intervalHours = intervalMin / 60;
+      const ratePerInterval = parseFloat(item.fundingRate);
+      if (isNaN(ratePerInterval)) continue;
 
-          const item = items[0];
-          const intervalMin = parseInt(item.fundingRateIntervalMin) || 240;
-          const intervalHours = intervalMin / 60;
-          const ratePerInterval = parseFloat(item.fundingRate);
-          if (isNaN(ratePerInterval)) return null;
+      let symbol = contract.contractName?.replace(/USD$/, '') || '';
+      symbol = symbol.replace(/\d+$/, ''); // Remove trailing digits like BNB2 -> BNB
 
-          let symbol = c.contractName?.replace(/USD$/, '') || '';
-          symbol = symbol.replace(/\d+$/, ''); // Remove trailing digits like BNB2 -> BNB
-
-          return {
-            symbol,
-            fundingRate: ratePerInterval / intervalHours, // normalize to 1h
-            fundingIntervalH: intervalHours,
-            markPrice: parseFloat(item.markPrice) || null,
-            indexPrice: parseFloat(item.indexPrice) || null,
-            openInterest: null,
-            nextFundingTime: (parseInt(item.fundingTime) || 0) + intervalMin * 60_000 || null,
-          } satisfies DexFundingRate;
-        })
-      );
-
-      for (const r of results) {
-        if (r.status === 'fulfilled' && r.value) rates.push(r.value);
-      }
+      rates.push({
+        symbol,
+        fundingRate: ratePerInterval / intervalHours, // normalize to 1h
+        fundingIntervalH: intervalHours,
+        markPrice: parseFloat(item.markPrice) || null,
+        indexPrice: parseFloat(item.indexPrice) || null,
+        openInterest: null,
+        nextFundingTime: (parseInt(item.fundingTime) || 0) + intervalMin * 60_000 || null,
+      });
     }
 
     return { dex: 'edgex', label: 'EdgeX', rates };
