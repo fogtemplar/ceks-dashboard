@@ -89,32 +89,88 @@ export function ArbOpportunities({
     for (const row of rows) {
       if (row.dexCount < 2) continue;
 
-      // Get rates for selected dexes (or all if none selected)
-      const dexesToCheck = selectedDexes.length > 0 ? selectedDexes : ALL_DEXES;
-      const available = dexesToCheck.filter((d) => row.rates[d] !== undefined);
-      if (available.length < 2) continue;
+      if (selectedDexes.length === 2) {
+        // 2 selected: compare only those two
+        const [a, b] = selectedDexes;
+        const rateA = row.rates[a];
+        const rateB = row.rates[b];
+        if (rateA === undefined || rateB === undefined) continue;
 
-      // Find best long (most negative rate = you receive funding) and best short (most positive)
-      let bestLongDex = available[0];
-      let bestShortDex = available[0];
-      for (const d of available) {
-        if (row.rates[d]! < row.rates[bestLongDex]!) bestLongDex = d;
-        if (row.rates[d]! > row.rates[bestShortDex]!) bestShortDex = d;
+        const longDex = rateA < rateB ? a : b;
+        const shortDex = rateA < rateB ? b : a;
+        const spread = row.rates[shortDex]! - row.rates[longDex]!;
+        if (spread <= 0) continue;
+
+        results.push({
+          symbol: row.symbol,
+          longDex,
+          longRate: row.rates[longDex]!,
+          shortDex,
+          shortRate: row.rates[shortDex]!,
+          spread,
+          dexCount: row.dexCount,
+        });
+      } else if (selectedDexes.length === 1) {
+        // 1 selected: compare that exchange vs all others
+        const picked = selectedDexes[0];
+        const pickedRate = row.rates[picked];
+        if (pickedRate === undefined) continue;
+
+        const others = ALL_DEXES.filter((d) => d !== picked && row.rates[d] !== undefined);
+        if (others.length === 0) continue;
+
+        // Find the best counterparty
+        let bestOther = others[0];
+        let bestSpread = 0;
+        for (const o of others) {
+          const spread = Math.abs(row.rates[o]! - pickedRate);
+          if (spread > bestSpread) {
+            bestSpread = spread;
+            bestOther = o;
+          }
+        }
+
+        const otherRate = row.rates[bestOther]!;
+        const longDex = pickedRate < otherRate ? picked : bestOther;
+        const shortDex = pickedRate < otherRate ? bestOther : picked;
+        const spread = row.rates[shortDex]! - row.rates[longDex]!;
+        if (spread <= 0) continue;
+
+        results.push({
+          symbol: row.symbol,
+          longDex,
+          longRate: row.rates[longDex]!,
+          shortDex,
+          shortRate: row.rates[shortDex]!,
+          spread,
+          dexCount: row.dexCount,
+        });
+      } else {
+        // None selected: compare all
+        const available = ALL_DEXES.filter((d) => row.rates[d] !== undefined);
+        if (available.length < 2) continue;
+
+        let bestLongDex = available[0];
+        let bestShortDex = available[0];
+        for (const d of available) {
+          if (row.rates[d]! < row.rates[bestLongDex]!) bestLongDex = d;
+          if (row.rates[d]! > row.rates[bestShortDex]!) bestShortDex = d;
+        }
+
+        if (bestLongDex === bestShortDex) continue;
+        const spread = row.rates[bestShortDex]! - row.rates[bestLongDex]!;
+        if (spread <= 0) continue;
+
+        results.push({
+          symbol: row.symbol,
+          longDex: bestLongDex,
+          longRate: row.rates[bestLongDex]!,
+          shortDex: bestShortDex,
+          shortRate: row.rates[bestShortDex]!,
+          spread,
+          dexCount: row.dexCount,
+        });
       }
-
-      if (bestLongDex === bestShortDex) continue;
-      const spread = row.rates[bestShortDex]! - row.rates[bestLongDex]!;
-      if (spread <= 0) continue;
-
-      results.push({
-        symbol: row.symbol,
-        longDex: bestLongDex,
-        longRate: row.rates[bestLongDex]!,
-        shortDex: bestShortDex,
-        shortRate: row.rates[bestShortDex]!,
-        spread,
-        dexCount: row.dexCount,
-      });
     }
 
     results.sort((a, b) => b.spread - a.spread);
@@ -134,7 +190,7 @@ export function ArbOpportunities({
       {/* Exchange filter */}
       <div className="flex flex-wrap items-center gap-1.5 mb-3">
         <span className="text-[10px] text-zinc-500 mr-1">
-          {selectedDexes.length === 0 ? 'All' : `${selectedDexes.length}/2`}:
+          {selectedDexes.length === 0 ? 'All vs All' : selectedDexes.length === 1 ? `${DEX_LABELS[selectedDexes[0]]} vs All` : `${DEX_LABELS[selectedDexes[0]]} vs ${DEX_LABELS[selectedDexes[1]]}`}:
         </span>
         {ALL_DEXES.map((d) => (
           <button
