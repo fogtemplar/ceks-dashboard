@@ -83,6 +83,15 @@ export function aggregateFunding(
       }
     }
 
+    // Compute price gap across exchanges
+    const priceValues = Object.values(prices).filter((p): p is number => p != null && p > 0);
+    let priceGap = 0;
+    if (priceValues.length >= 2) {
+      const minP = Math.min(...priceValues);
+      const maxP = Math.max(...priceValues);
+      priceGap = (maxP - minP) / minP;
+    }
+
     rows.push({
       symbol,
       rates,
@@ -91,6 +100,7 @@ export function aggregateFunding(
       bestLong,
       bestShort,
       spread: dexEntries.length >= 2 ? maxRate - minRate : 0,
+      priceGap,
       dexCount: dexEntries.length,
     });
   }

@@ -50,6 +50,15 @@ function fmtAnnual(hourlyRate: number): string {
   return `${annual >= 0 ? '+' : ''}${annual.toFixed(1)}%`;
 }
 
+function fmtPrice(price: number | undefined): string {
+  if (price === undefined || price === 0) return '';
+  if (price >= 10000) return `$${price.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+  if (price >= 100) return `$${price.toFixed(1)}`;
+  if (price >= 1) return `$${price.toFixed(2)}`;
+  if (price >= 0.01) return `$${price.toFixed(4)}`;
+  return `$${price.toFixed(6)}`;
+}
+
 function fmtMoney(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
@@ -60,9 +69,12 @@ interface ArbRow {
   symbol: string;
   longDex: DexName;
   longRate: number;
+  longPrice: number | undefined;
   shortDex: DexName;
   shortRate: number;
+  shortPrice: number | undefined;
   spread: number;
+  priceGap: number;
   dexCount: number;
 }
 
@@ -108,9 +120,12 @@ export function ArbOpportunities({
           symbol: row.symbol,
           longDex,
           longRate: row.rates[longDex]!,
+          longPrice: row.prices[longDex],
           shortDex,
           shortRate: row.rates[shortDex]!,
+          shortPrice: row.prices[shortDex],
           spread,
+          priceGap: row.priceGap,
           dexCount: row.dexCount,
         });
       } else if (selectedDexes.length === 1) {
@@ -143,9 +158,12 @@ export function ArbOpportunities({
           symbol: row.symbol,
           longDex,
           longRate: row.rates[longDex]!,
+          longPrice: row.prices[longDex],
           shortDex,
           shortRate: row.rates[shortDex]!,
+          shortPrice: row.prices[shortDex],
           spread,
+          priceGap: row.priceGap,
           dexCount: row.dexCount,
         });
       } else {
@@ -168,9 +186,12 @@ export function ArbOpportunities({
           symbol: row.symbol,
           longDex: bestLongDex,
           longRate: row.rates[bestLongDex]!,
+          longPrice: row.prices[bestLongDex],
           shortDex: bestShortDex,
           shortRate: row.rates[bestShortDex]!,
+          shortPrice: row.prices[bestShortDex],
           spread,
+          priceGap: row.priceGap,
           dexCount: row.dexCount,
         });
       }
@@ -320,8 +341,15 @@ export function ArbOpportunities({
                       {row.dexCount} DEXes
                     </span>
                   </div>
-                  <div className="text-amber-400 font-medium text-[11px]">
-                    {fmtAnnual(row.spread)} APR
+                  <div className="flex items-center gap-2">
+                    {row.priceGap > 0 && (
+                      <span className={`text-[10px] font-mono ${row.priceGap >= 0.005 ? 'text-red-400' : row.priceGap >= 0.001 ? 'text-amber-400/70' : 'text-zinc-500'}`}>
+                        Gap {(row.priceGap * 100).toFixed(3)}%
+                      </span>
+                    )}
+                    <span className="text-amber-400 font-medium text-[11px]">
+                      {fmtAnnual(row.spread)} APR
+                    </span>
                   </div>
                 </div>
 
@@ -336,6 +364,9 @@ export function ArbOpportunities({
                       </span>
                     </div>
                     <div className="text-zinc-500 font-mono">{fmtRate(row.longRate)}/h</div>
+                    {row.longPrice !== undefined && row.longPrice > 0 && (
+                      <div className="text-[9px] text-zinc-600 font-mono">{fmtPrice(row.longPrice)}</div>
+                    )}
                   </div>
                   <div>
                     <div className="flex items-center gap-1 text-green-400">
@@ -347,6 +378,9 @@ export function ArbOpportunities({
                       </span>
                     </div>
                     <div className="text-zinc-500 font-mono">{fmtRate(row.shortRate)}/h</div>
+                    {row.shortPrice !== undefined && row.shortPrice > 0 && (
+                      <div className="text-[9px] text-zinc-600 font-mono">{fmtPrice(row.shortPrice)}</div>
+                    )}
                   </div>
                   {positionSize > 0 && (
                     <div className="ml-auto text-right border-l border-zinc-700 pl-3">

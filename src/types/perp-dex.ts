@@ -41,6 +41,7 @@ export interface AggregatedFundingRow {
   bestLong: { dex: DexName; rate: number } | null; // most negative = best for long
   bestShort: { dex: DexName; rate: number } | null; // most positive = best for short
   spread: number; // max - min rate (arb opportunity)
+  priceGap: number; // (maxPrice - minPrice) / minPrice as decimal (e.g. 0.001 = 0.1%)
   dexCount: number;
 }
 

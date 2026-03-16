@@ -62,7 +62,21 @@ function fmtInterval(h: number | undefined): string {
   return `${h}h`;
 }
 
-type SortKey = 'symbol' | 'spread' | 'dexCount' | DexName;
+function fmtPrice(price: number | undefined): string {
+  if (price === undefined || price === 0) return '';
+  if (price >= 10000) return `$${price.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+  if (price >= 100) return `$${price.toFixed(1)}`;
+  if (price >= 1) return `$${price.toFixed(2)}`;
+  if (price >= 0.01) return `$${price.toFixed(4)}`;
+  return `$${price.toFixed(6)}`;
+}
+
+function fmtGap(gap: number): string {
+  if (gap === 0) return '-';
+  return `${(gap * 100).toFixed(3)}%`;
+}
+
+type SortKey = 'symbol' | 'spread' | 'priceGap' | 'dexCount' | DexName;
 type SortDir = 'asc' | 'desc';
 
 export function FundingTable({
@@ -100,6 +114,8 @@ export function FundingTable({
         cmp = a.symbol.localeCompare(b.symbol);
       } else if (sortKey === 'spread') {
         cmp = a.spread - b.spread;
+      } else if (sortKey === 'priceGap') {
+        cmp = a.priceGap - b.priceGap;
       } else if (sortKey === 'dexCount') {
         cmp = a.dexCount - b.dexCount;
       } else {
@@ -221,6 +237,7 @@ export function FundingTable({
                 />
               ))}
               <SortHeader label="Spread" col="spread" className="text-right" />
+              <SortHeader label="Gap" col="priceGap" className="text-right" />
               <SortHeader label="#" col="dexCount" className="text-right pr-3" />
             </tr>
           </thead>
@@ -243,6 +260,7 @@ export function FundingTable({
                     const interval = row.intervals[d];
                     const isMin = rate !== undefined && rate === minR && rateValues.length > 1;
                     const isMax = rate !== undefined && rate === maxR && rateValues.length > 1;
+                    const price = row.prices[d];
                     return (
                       <td
                         key={d}
@@ -256,6 +274,11 @@ export function FundingTable({
                             {fmtInterval(interval)}
                           </div>
                         )}
+                        {price !== undefined && price > 0 && (
+                          <div className="text-[8px] text-zinc-500">
+                            {fmtPrice(price)}
+                          </div>
+                        )}
                       </td>
                     );
                   })}
@@ -263,6 +286,9 @@ export function FundingTable({
                     {row.spread > 0
                       ? `${(row.spread * 100).toFixed(4)}%`
                       : '-'}
+                  </td>
+                  <td className={`px-2 py-1.5 text-right font-mono ${row.priceGap >= 0.005 ? 'text-red-400' : row.priceGap >= 0.001 ? 'text-amber-400' : 'text-zinc-500'}`}>
+                    {fmtGap(row.priceGap)}
                   </td>
                   <td className="px-2 py-1.5 text-right pr-3 text-zinc-500">
                     {row.dexCount}
